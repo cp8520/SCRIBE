@@ -3,8 +3,7 @@
   "WorkspaceRootPath": "C:\\Users\\cp852\\source\\repos\\SCRIBE\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\cp852\\source\\repos\\SCRIBE\\eBim.Scribe.py||{8B382828-6202-11D1-8870-0000F87579D2}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:eBim.Scribe.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\cp852\\Documents\\SCRIBE-1.1.21\\SCRIBE-1.1.21\\eBim.Scribe.py||{8B382828-6202-11D1-8870-0000F87579D2}"
     }
   ],
   "DocumentGroupContainers": [
@@ -20,13 +19,13 @@
               "$type": "Document",
               "DocumentIndex": 0,
               "Title": "eBim.Scribe.py",
-              "DocumentMoniker": "C:\\Users\\cp852\\source\\repos\\SCRIBE\\eBim.Scribe.py",
-              "RelativeDocumentMoniker": "eBim.Scribe.py",
-              "ToolTip": "C:\\Users\\cp852\\source\\repos\\SCRIBE\\eBim.Scribe.py",
-              "RelativeToolTip": "eBim.Scribe.py",
-              "ViewState": "AQIAAD8AAAAAAAAAAAAAAEkAAAAsAAAA",
+              "DocumentMoniker": "C:\\Users\\cp852\\Documents\\SCRIBE-1.1.21\\SCRIBE-1.1.21\\eBim.Scribe.py",
+              "RelativeDocumentMoniker": "..\\..\\..\\Documents\\SCRIBE-1.1.21\\SCRIBE-1.1.21\\eBim.Scribe.py",
+              "ToolTip": "C:\\Users\\cp852\\Documents\\SCRIBE-1.1.21\\SCRIBE-1.1.21\\eBim.Scribe.py",
+              "RelativeToolTip": "..\\..\\..\\Documents\\SCRIBE-1.1.21\\SCRIBE-1.1.21\\eBim.Scribe.py",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAgAAAAdAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
-              "WhenOpened": "2024-03-07T01:17:30.92Z",
+              "WhenOpened": "2024-03-07T07:36:36.587Z",
               "EditorCaption": ""
             }
           ]
