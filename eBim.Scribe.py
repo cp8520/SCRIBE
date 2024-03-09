@@ -1,12 +1,44 @@
 import sys
 import flet as ft
+import pyperclip
 from zoneinfo import ZoneInfo
 from datetime import datetime
+class Data:
+    def __init__(self) -> None:
+        self.counter = 0
+
+d = Data()
 
 def main(page: ft.Page):
     page.window_min_height = 680
     page.window_min_width = 320
     page.auto_scroll = True
+
+    page.snack_bar = ft.SnackBar(
+        content=ft.Text("Hello, world!"),
+        action="Alright!",
+    )  
+
+    def count_up(e):
+        d.counter += 1
+        page.update()
+    
+    def count_down(e):
+        d.counter -= 1
+        page.update()
+
+    def open_snackbar(e):
+        page.snack_bar = ft.SnackBar(ft.Row([
+            # ft.IconButton(ft.icons.ADD,on_click=count_up),
+            # ft.IconButton(ft.icons.REMOVE,on_click=count_down),
+            ft.IconButton(ft.icons.SELECT_ALL),
+            ft.IconButton(ft.icons.COPY),
+            ft.IconButton(ft.icons.CUT),
+            ft.IconButton(ft.icons.PASTE),
+            
+        ]))
+        page.snack_bar.open = True
+        page.update()
 
     def pick_files_result(e: ft.FilePickerResultEvent):
         selected_files.value = (
@@ -30,37 +62,67 @@ def main(page: ft.Page):
             enable_suggestions=True, multiline=True,shift_enter=True, on_submit=insert_timestamp,show_cursor=True,on_focus=insert_timestamp
             )
         return input_field
+    def check_tab_index(event,index):
+        print(f"CLICKED & Index={index}")
 
     tabs_list = []
+    tabs_index = []
+    
 
     def add_tab(event):
-        new_tab = ft.Tab(text=f"eBim {len(tabs_list)+1}", content=ft.Column([create_input_field()]))
-        tabs_list.append(new_tab)  
+        t = build_tab()
+        tabs_list.append(t)  
         tabs_control.tabs = tabs_list  
-        tabs_control.selected_index = len(tabs_list) - 1 
+        tabs_control.selected_index = len(tabs_list) - 1
         page.update()
     
-    def close_tab(event):
-            
+    def close_tab(e,index):
         tabs_control.tabs = tabs_list  
-        tabs_control.selected_index = len(tabs_list)
-        tabs_list.pop()
+        try:
+            tabs_list.pop(index)
+        except:
+            tabs_list.pop()
+        page.update()
+
+    def close_tabs(e):  
+        tabs_list.clear()
         page.update()
 
     def close_app(event):
         print("exit")
-        sys.exit()
+        quit()
 
     def check_item_clicked(e):
-                e.control.checked = not e.control.checked
-                add_tab(e)
-                e.control.checked = not e.control.checked
-                page.update()
+        e.control.checked = not e.control.checked
+        add_tab(e)
+        e.control.checked = not e.control.checked
+        page.update()
+
+    tabs_control = ft.Tabs(
+        selected_index=0,
+        animation_duration=300,
+        tabs=tabs_list,
+        expand=0,    
+        ) 
+
+    def build_tab():
+        new_tab = ft.Tab(text=f"eBim {len(tabs_list)+1}",  content=ft.Column([            
+            create_input_field(),
+            # ft.Row([            
+            #     # ft.Text(f"Count: {d.counter}"),
+            #     ft.Text(f" "),
+            #     ft.IconButton(ft.icons.ABC,on_click=lambda e: open_snackbar(e))]),
+
+            ]))
+        return new_tab
 
     page.appbar = ft.AppBar(
-    leading=ft.PopupMenuButton(tooltip="Menu",icon=ft.icons.MENU,items=[ft.PopupMenuItem(text="Add Tab",checked=False,on_click=add_tab),
+    leading=ft.PopupMenuButton(tooltip="Menu",icon=ft.icons.MENU,items=[
+                ft.PopupMenuItem(text="Add Tab",checked=False,on_click=lambda e: add_tab(e)),
                 ft.PopupMenuItem(),
-                ft.PopupMenuItem(text="Remove Tab",checked=False,on_click=close_tab),
+                ft.PopupMenuItem(text="Remove Tab",checked=False,on_click=lambda e: close_tab(e,tabs_control.selected_index)),                
+                ft.PopupMenuItem(),
+                ft.PopupMenuItem(text="Close All Tabs",checked=False,on_click=lambda e: close_tabs(e)),
                 ]),
     leading_width=50,
     title=ft.Text("eBim SCRIBE"),
@@ -78,16 +140,9 @@ def main(page: ft.Page):
     ],
 )
 
-    tabs_control = ft.Tabs(
-        selected_index=0,
-        animation_duration=300,
-        tabs=tabs_list,
-        expand=0,            
-    
-    )
-    add_tab_button = ft.IconButton(icon="PLAYLIST_ADD", on_click=add_tab)
+    add_tab_button = ft.IconButton(icon="PLAYLIST_ADD", on_click=lambda e: add_tab(e, build_tab))
     add_close_app_button = ft.IconButton(icon="CLOSE", on_click=close_app,)
-    add_close_tab_button = ft.IconButton(icon="PLAYLIST_REMOVE", on_click=close_tab,)
+    add_close_tab_button = ft.IconButton(icon="PLAYLIST_REMOVE", on_click=lambda e: close_tab(e,tabs_control.selected_index))
 
     page.add(tabs_control)
 
