@@ -113,7 +113,7 @@ def main(page: ft.Page):
     def manipulate_input_field_copy(event,index):
         selected_index = index
         if 0 <= selected_index < len(input_fields):
-            current_input_field = input_fields[selected_index]
+            current_input_field = tabs_control.selected_index
             for current_input_field in input_fields:
                 pyperclip.copy(current_input_field.value)
                 create_input_field.value = "Copied"
@@ -122,8 +122,9 @@ def main(page: ft.Page):
     def manipulate_input_field_paste(event,index):
         selected_index = index
         if 0 <= selected_index < len(input_fields):
-            current_input_field = input_fields[selected_index]
+            tabs_control.selected_index = tabs_control.selected_index
             for current_input_field in input_fields:
+                input_fields[tabs_control.selected_index].value = None
                 input_fields[tabs_control.selected_index].value = pyperclip.paste()
                 page.update()
 
