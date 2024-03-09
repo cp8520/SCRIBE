@@ -72,9 +72,9 @@ def main(page: ft.Page):
             # ft.IconButton(ft.icons.ADD,on_click=count_up),
             # ft.IconButton(ft.icons.REMOVE,on_click=count_down),
             # ft.IconButton(ft.icons.SELECT_ALL,on_click=lambda e: manipulate_input_field_copy(e,tabs_control.selected_index)),
-            ft.IconButton(ft.icons.COPY,on_click=lambda e: manipulate_input_field_copy(e,tabs_control.selected_index)),
+            ft.IconButton(ft.icons.COPY_ALL,on_click=lambda e: manipulate_input_field_copy(e,tabs_control.selected_index),on_focus=ft.icons.COPY_ALL_OUTLINED),
             # ft.IconButton(ft.icons.CUT),
-            ft.IconButton(ft.icons.PASTE,on_click=lambda e: manipulate_input_field_paste(e,tabs_control.selected_index)),
+            ft.IconButton(ft.icons.PASTE,on_click=lambda e: manipulate_input_field_paste(e,tabs_control.selected_index),on_focus=ft.icons.PASTE_OUTLINED),
             
         ]))
         page.snack_bar.open = True
@@ -124,8 +124,7 @@ def main(page: ft.Page):
         if 0 <= selected_index < len(input_fields):
             current_input_field = input_fields[selected_index]
             for current_input_field in input_fields:
-                current_input_field.value = None
-                current_input_field.value = pyperclip.paste()
+                input_fields[tabs_control.selected_index].value = pyperclip.paste()
                 page.update()
 
             
