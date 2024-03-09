@@ -3,6 +3,44 @@ import flet as ft
 import pyperclip
 from zoneinfo import ZoneInfo
 from datetime import datetime
+import winreg
+# import subprocess
+class DarkMode:
+    # def is_dark_mode_mac():
+    #     command = '''
+    #         tell application "System Events"
+    #             tell appearance preferences
+    #                 set dark_mode to dark mode
+    #             end tell
+    #         end tell
+    #         return dark_mode
+    #     '''
+    #     result = subprocess.run(['osascript', '-e', command], capture_output=True, text=True)
+    #     return result.stdout.strip() == "true"
+
+    # if is_dark_mode_mac():
+    #     print("Darkmode on")
+    #     pass
+    # else:
+    #     print("Darkmode off")
+    #     pass
+
+    def is_dark_mode_windows():
+        try:
+            key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize")
+            value, _ = winreg.QueryValueEx(key, "AppsUseLightTheme")
+            return value == 0
+        except Exception as e:
+            print(f"Error: {e}")
+            return False
+
+    if is_dark_mode_windows():
+        print("Darkmode on")
+        pass
+    else:
+        print("Darkmode off")
+        pass
+
 class Data:
     def __init__(self) -> None:
         self.counter = 0
@@ -10,6 +48,8 @@ class Data:
 d = Data()
 
 def main(page: ft.Page):
+    DarkMode.is_dark_mode_windows()
+    # DarkMode.is_dark_mode_mac()
     page.window_min_height = 680
     page.window_min_width = 320
     page.auto_scroll = True
