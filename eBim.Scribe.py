@@ -52,13 +52,19 @@ def main(page: ft.Page):
     # DarkMode.is_dark_mode_mac()
     page.window_min_height = 680
     page.window_min_width = 320
-    page.auto_scroll = True
+    page.auto_scroll = False
+    page.window_opacity = 5
+    page.window_frameless = True
+    page.window_title_bar_hidden = True
+    page.window_title_bar_buttons_hidden = True
+    page.window_center()
+    
 
     tabs_list = []
     tabs_index = []
     input_fields = []
     tab_names = ["Scribe Tab"]
-
+    
     def set_tab_name(name, index):
         # Ensure index is an integer
         if not isinstance(index, int):
@@ -73,6 +79,11 @@ def main(page: ft.Page):
             print("Index is out of the valid range.")
         page.update()
 
+    def get_window_size():
+        h = page.height
+        w = page.width
+        page.update()
+        return w,h
 
     def open_adaptive_dialog(e):
         page.dialog = adaptive_alert_dialog
@@ -98,6 +109,8 @@ def main(page: ft.Page):
             
         ]))
         page.snack_bar.open = True
+        page.snack_bar.bgcolor = ft.colors.GREY_800
+        page.snack_bar.opacity = 90
         page.update()
 
     def pick_files_result(e: ft.FilePickerResultEvent):
@@ -117,12 +130,17 @@ def main(page: ft.Page):
         page.update()
     
     def create_input_field():
+        W,H = get_window_size()
+        heightData = H
+        if heightData != H:
+            page.update
         input_field = ft.TextField(
-            min_lines=20,max_lines=20, autocorrect=True, hint_text="Click to Start Scribing!",
+            min_lines=20,max_lines=20, autocorrect=True, hint_text="Click to Start Scribing!",height=H,
             enable_suggestions=True, multiline=True,shift_enter=True, on_submit=insert_timestamp,show_cursor=True,on_focus=insert_timestamp
             )
         input_fields.append(input_field)
         return input_field
+    
     def check_tab_index(event,index):
         print(f"CLICKED & Index={index}")
 
@@ -173,7 +191,7 @@ def main(page: ft.Page):
 
     def close_app(event):
         print("exit")
-        quit()
+        page.window_close()
 
     def check_item_clicked(e):
         e.control.checked = not e.control.checked
@@ -195,13 +213,13 @@ def main(page: ft.Page):
             tab_names[index] = input.value
 
     def build_tab():
-        new_tab = ft.Tab(tab_content=ft.Row([ft.TextButton(f"{tab_names[0]}",on_click=lambda e: open_adaptive_dialog(e),disabled=True)]),content=ft.Column([    
+        new_tab = ft.Tab(tab_content=ft.Row([
+            ft.TextButton(
+            f"{tab_names[0]}",
+            on_click=lambda e: open_adaptive_dialog(e),
+            disabled=True)]),
+            content=ft.Column([    
             create_input_field(),
-            ft.Row([            
-                # ft.Text(f"Count: {d.counter}"),
-                ft.Text(f"Tools: "),
-                ft.IconButton(ft.icons.ABC,on_click=lambda e: open_snackbar(e))]),
-
             ]))
         set_tab_name("Scribe Tab",tabs_control.selected_index)
         return new_tab
@@ -215,12 +233,17 @@ def main(page: ft.Page):
                 # ft.PopupMenuItem(text="Close All Tabs",checked=False,on_click=lambda e: close_tabs(e)),
                 ]),
     leading_width=50,
-    title=ft.Text("SCRIBE"),
+    title=ft.WindowDragArea(ft.Container(ft.Text("SCRIBE"),padding=20)),
     center_title=True,
     bgcolor=ft.colors.SURFACE_VARIANT,
     actions=[ft.Row([
-        ft.Text("Version 1.1.25"),
         ft.Divider(),
+        ft.IconButton(ft.icons.ABC_ROUNDED, on_click= lambda e: open_snackbar(e)),
+        ft.Divider(),
+        ft.IconButton(ft.icons.CLOSE,on_click=close_app),
+        ft.Divider(),
+        ft.Text("V1.1.25",tooltip="by Christian Paustell"),
+        
         ft.Divider(),
     ])
         # ft.PopupMenuButton(icon=ft.icons.SAVE_ALT,tooltip="Save Notes",
@@ -233,10 +256,6 @@ def main(page: ft.Page):
         # ),
     ],
 )
-    page.snack_bar = ft.SnackBar(
-        content=ft.Text("Hello, world!"),
-        action="Alright!",
-    )  
 
     actions = []
     if page.platform in ["ios", "macos"]:
@@ -246,6 +265,9 @@ def main(page: ft.Page):
         ]
     else:
         actions = [ft.TextButton("OK",on_click=lambda e:name_current_tab(e,tabs_control.selected_index))]
+                
+    drag_area = ft.WindowDragArea(ft.Container(ft.Text("Drag this area to move, maximize and restore application window."), padding=10), expand=True),
+
 
     adaptive_alert_dialog = ft.AlertDialog(
         adaptive=True,
@@ -257,7 +279,8 @@ def main(page: ft.Page):
     add_close_app_button = ft.IconButton(icon="CLOSE", on_click=close_app,)
     add_close_tab_button = ft.IconButton(icon="PLAYLIST_REMOVE", on_click=lambda e: close_tab(e,tabs_control.selected_index))
 
-    page.add(tabs_control)
+    page.add(                ft.WindowDragArea(ft.Container(tabs_control, padding=10), expand=True),
+)
 
 
 ft.app(target=main)
