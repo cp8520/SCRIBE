@@ -54,10 +54,30 @@ def main(page: ft.Page):
     page.window_min_width = 320
     page.auto_scroll = True
 
-    page.snack_bar = ft.SnackBar(
-        content=ft.Text("Hello, world!"),
-        action="Alright!",
-    )  
+    tabs_list = []
+    tabs_index = []
+    input_fields = []
+    tab_names = ["Scribe Tab"]
+
+    def set_tab_name(name, index):
+        # Ensure index is an integer
+        if not isinstance(index, int):
+            raise ValueError("Index must be an integer")
+
+        if name is None:
+            name = "New Tab"
+        elif 0 <= index < len(tab_names):
+            tab_names.insert(index, name)
+        else:
+            # Handle the case where index is out of bounds, if needed
+            print("Index is out of the valid range.")
+        page.update()
+
+
+    def open_adaptive_dialog(e):
+        page.dialog = adaptive_alert_dialog
+        adaptive_alert_dialog.open = True
+        page.update()
 
     def count_up(e):
         d.counter += 1
@@ -106,10 +126,6 @@ def main(page: ft.Page):
     def check_tab_index(event,index):
         print(f"CLICKED & Index={index}")
 
-    tabs_list = []
-    tabs_index = []
-    input_fields = []
-
     def manipulate_input_field_copy(event, index):
         if 0 <= index < len(input_fields):
             field_to_copy = input_fields[index]
@@ -128,7 +144,6 @@ def main(page: ft.Page):
                 page.update()
             else:
                 print(f"Error: No input field exists at index {index}.")
-
 
     def add_tab(event):
         t = build_tab()
@@ -149,8 +164,6 @@ def main(page: ft.Page):
         else:
             print("Error: Invalid index for tab closure.")
         page.update()
-
-
 
     def close_tabs(e):  
         tabs_list.clear()
@@ -173,10 +186,16 @@ def main(page: ft.Page):
         animation_duration=300,
         tabs=tabs_list,
         expand=0,    
-        ) 
+        )
+    
+    def name_current_tab(e,index):
+        input = ft.TextField(on_submit=lambda index: set_tab_name(input, index))
+        page.update()
+        if 0 <= index < len(tabs_list)-1:
+            tab_names[index] = input.value
 
     def build_tab():
-        new_tab = ft.Tab(tab_content=ft.Icon(ft.icons.TAB),content=ft.Column([            
+        new_tab = ft.Tab(tab_content=ft.Row([ft.TextButton(f"{tab_names[0]}",on_click=lambda e: open_adaptive_dialog(e),disabled=True)]),content=ft.Column([    
             create_input_field(),
             ft.Row([            
                 # ft.Text(f"Count: {d.counter}"),
@@ -184,6 +203,7 @@ def main(page: ft.Page):
                 ft.IconButton(ft.icons.ABC,on_click=lambda e: open_snackbar(e))]),
 
             ]))
+        set_tab_name("Scribe Tab",tabs_control.selected_index)
         return new_tab
 
     page.appbar = ft.AppBar(
@@ -213,7 +233,26 @@ def main(page: ft.Page):
         # ),
     ],
 )
+    page.snack_bar = ft.SnackBar(
+        content=ft.Text("Hello, world!"),
+        action="Alright!",
+    )  
 
+    actions = []
+    if page.platform in ["ios", "macos"]:
+        actions = [
+            ft.CupertinoDialogAction("OK"),
+            ft.CupertinoDialogAction("Cancel"),
+        ]
+    else:
+        actions = [ft.TextButton("OK",on_click=lambda e:name_current_tab(e,tabs_control.selected_index))]
+
+    adaptive_alert_dialog = ft.AlertDialog(
+        adaptive=True,
+        title=ft.Text("Name this tab?"),
+        content=ft.TextField(show_cursor=True,multiline=False,max_lines=1,animate_size=2),
+        actions=actions,
+    )
     add_tab_button = ft.IconButton(icon="PLAYLIST_ADD", on_click=lambda e: add_tab(e, build_tab))
     add_close_app_button = ft.IconButton(icon="CLOSE", on_click=close_app,)
     add_close_tab_button = ft.IconButton(icon="PLAYLIST_REMOVE", on_click=lambda e: close_tab(e,tabs_control.selected_index))
