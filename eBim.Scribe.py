@@ -98,7 +98,7 @@ def main(page: ft.Page):
     
     def create_input_field():
         input_field = ft.TextField(
-            min_lines=20,max_lines=20, autocorrect=True, hint_text="Start scribing!",
+            min_lines=20,max_lines=20, autocorrect=True, hint_text="Click to Start Scribing!",
             enable_suggestions=True, multiline=True,shift_enter=True, on_submit=insert_timestamp,show_cursor=True,on_focus=insert_timestamp
             )
         input_fields.append(input_field)
@@ -112,17 +112,23 @@ def main(page: ft.Page):
 
     def manipulate_input_field_copy(event, index):
         if 0 <= index < len(input_fields):
-            pyperclip.copy(input_fields[index].value)
-            create_input_field.value = "Copied"
-            page.update()
+            field_to_copy = input_fields[index]
+            if field_to_copy:
+                pyperclip.copy(field_to_copy.value)
+                create_input_field.value = "Copied"
+                page.update()
+            else:
+                print(f"Error: No input field exists at index {index}.")
 
     def manipulate_input_field_paste(event, index):
         if 0 <= index < len(input_fields):
-            input_fields[index].value = pyperclip.paste()
-            page.update()
+            target_field = input_fields[index]
+            if target_field:
+                target_field.value = pyperclip.paste()
+                page.update()
+            else:
+                print(f"Error: No input field exists at index {index}.")
 
-
-            
 
     def add_tab(event):
         t = build_tab()
@@ -131,17 +137,25 @@ def main(page: ft.Page):
         tabs_control.selected_index = len(tabs_list) - 1
         page.update()
     
-    def close_tab(e,index):
-        tabs_control.tabs = tabs_list  
-        try:
-            tabs_list.pop(index)
-            tabs_control.selected_index = len(tabs_list)-1
-        except:
-            tabs_list.pop()
+    def close_tab(e, index):
+        if 0 <= index < len(tabs_list):
+            try:
+                tabs_list.pop(index)
+                input_fields.pop(index)
+                tabs_control.tabs = tabs_list
+                tabs_control.selected_index = min(index, len(tabs_list) - 1)
+            except Exception as ex:
+                print(f"An error occurred: {ex}")
+        else:
+            print("Error: Invalid index for tab closure.")
         page.update()
+
+
 
     def close_tabs(e):  
         tabs_list.clear()
+        tabs_list.sort()
+        tabs_control.selected_index = 0
         page.update()
 
     def close_app(event):
@@ -162,7 +176,7 @@ def main(page: ft.Page):
         ) 
 
     def build_tab():
-        new_tab = ft.Tab(text=f"eBim {len(tabs_list)+1}",  content=ft.Column([            
+        new_tab = ft.Tab(tab_content=ft.Icon(ft.icons.TAB),content=ft.Column([            
             create_input_field(),
             ft.Row([            
                 # ft.Text(f"Count: {d.counter}"),
@@ -178,13 +192,17 @@ def main(page: ft.Page):
                 ft.PopupMenuItem(),
                 ft.PopupMenuItem(text="Remove Tab",checked=False,on_click=lambda e: close_tab(e,tabs_control.selected_index)),                
                 ft.PopupMenuItem(),
-                ft.PopupMenuItem(text="Close All Tabs",checked=False,on_click=lambda e: close_tabs(e)),
+                # ft.PopupMenuItem(text="Close All Tabs",checked=False,on_click=lambda e: close_tabs(e)),
                 ]),
     leading_width=50,
-    title=ft.Text("eBim SCRIBE"),
+    title=ft.Text("SCRIBE"),
     center_title=True,
     bgcolor=ft.colors.SURFACE_VARIANT,
-    actions=[
+    actions=[ft.Row([
+        ft.Text("Version 1.1.24"),
+        ft.Divider(),
+        ft.Divider(),
+    ])
         # ft.PopupMenuButton(icon=ft.icons.SAVE_ALT,tooltip="Save Notes",
         #     items=[
         #         ft.PopupMenuItem(),
