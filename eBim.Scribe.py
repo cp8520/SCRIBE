@@ -219,7 +219,7 @@ def main(page: ft.Page):
     center_title=True,
     bgcolor=ft.colors.SURFACE_VARIANT,
     actions=[ft.Row([
-        ft.Text("Version 1.1.24"),
+        ft.Text("Version 1.1.25"),
         ft.Divider(),
         ft.Divider(),
     ])
