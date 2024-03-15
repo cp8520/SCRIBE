@@ -103,7 +103,7 @@ def main(page: ft.Page):
             # ft.IconButton(ft.icons.ADD,on_click=count_up),
             # ft.IconButton(ft.icons.REMOVE,on_click=count_down),
             # ft.IconButton(ft.icons.SELECT_ALL,on_click=lambda e: manipulate_input_field_copy(e,tabs_control.selected_index)),
-            ft.IconButton(ft.icons.COPY_ALL,on_click=lambda e: manipulate_input_field_copy(e,tabs_control.selected_index),on_focus=ft.icons.COPY_ALL_OUTLINED),
+            ft.IconButton(ft.icons.CONTENT_COPY,on_click=lambda e: manipulate_input_field_copy(e,tabs_control.selected_index),on_focus=ft.icons.COPY_ALL_OUTLINED),
             # ft.IconButton(ft.icons.CUT),
             ft.IconButton(ft.icons.PASTE,on_click=lambda e: manipulate_input_field_paste(e,tabs_control.selected_index),on_focus=ft.icons.PASTE_OUTLINED),
             
@@ -136,7 +136,7 @@ def main(page: ft.Page):
             page.update
         input_field = ft.TextField(
             min_lines=20,max_lines=20, autocorrect=True, hint_text="Click to Start Scribing!",height=H,
-            enable_suggestions=True, multiline=True,shift_enter=True, on_submit=insert_timestamp,show_cursor=True,on_focus=insert_timestamp
+            enable_suggestions=True, multiline=True,shift_enter=True, on_submit=insert_timestamp,show_cursor=True
             )
         input_fields.append(input_field)
         return input_field
@@ -205,7 +205,9 @@ def main(page: ft.Page):
         tabs=tabs_list,
         expand=0,    
         )
-    
+    page.floating_action_button = ft.FloatingActionButton(
+        icon=ft.icons.ADD, on_click=add_tab, bgcolor=ft.colors.GREY_800
+    )
     def name_current_tab(e,index):
         input = ft.TextField(on_submit=lambda index: set_tab_name(input, index))
         page.update()
@@ -216,7 +218,7 @@ def main(page: ft.Page):
         new_tab = ft.Tab(tab_content=ft.Row([
             ft.TextButton(
             f"{tab_names[0]}",
-            on_click=lambda e: open_adaptive_dialog(e),
+            on_click=lambda e: name_current_tab(e,tabs_control.selected_index),
             disabled=True)]),
             content=ft.Column([    
             create_input_field(),
@@ -226,8 +228,8 @@ def main(page: ft.Page):
 
     page.appbar = ft.AppBar(
     leading=ft.PopupMenuButton(tooltip="Menu",icon=ft.icons.MENU,items=[
-                ft.PopupMenuItem(text="Add Tab",checked=False,on_click=lambda e: add_tab(e)),
-                ft.PopupMenuItem(),
+                # ft.PopupMenuItem(text="Add Tab",checked=False,on_click=lambda e: add_tab(e)),
+                # ft.PopupMenuItem(),
                 ft.PopupMenuItem(text="Remove Tab",checked=False,on_click=lambda e: close_tab(e,tabs_control.selected_index)),                
                 ft.PopupMenuItem(),
                 # ft.PopupMenuItem(text="Close All Tabs",checked=False,on_click=lambda e: close_tabs(e)),
@@ -279,7 +281,7 @@ def main(page: ft.Page):
     add_close_app_button = ft.IconButton(icon="CLOSE", on_click=close_app,)
     add_close_tab_button = ft.IconButton(icon="PLAYLIST_REMOVE", on_click=lambda e: close_tab(e,tabs_control.selected_index))
 
-    page.add(                ft.WindowDragArea(ft.Container(tabs_control, padding=10), expand=True),
+    page.add(ft.Container(tabs_control, padding=10)
 )
 
 
