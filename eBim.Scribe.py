@@ -244,7 +244,7 @@ def main(page: ft.Page):
         ft.Divider(),
         ft.IconButton(ft.icons.CLOSE,on_click=close_app),
         ft.Divider(),
-        ft.Text("V1.1.26",tooltip="by Christian Paustell"),
+        ft.Text("V1.1.27",tooltip="by Christian Paustell"),
         
         ft.Divider(),
     ])
