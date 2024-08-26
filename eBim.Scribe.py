@@ -71,7 +71,7 @@ def main(page: ft.Page):
         if not isinstance(index, int):
             raise ValueError("Index must be an integer")
 
-        if name is None:
+        if len(name) <= 0:
             name = "New Tab"
         elif 0 <= index < len(tab_names):
             tab_names.insert(index, name)
@@ -121,16 +121,16 @@ def main(page: ft.Page):
         page.snack_bar.opacity = 90
         page.update()
 
-    def pick_files_result(e: ft.FilePickerResultEvent):
-        selected_files.value = (
-            ", ".join(map(lambda f: f.name, e.files)) if e.files else "Cancelled!"
-        )
-        selected_files.update()
+    # def pick_files_result(e: ft.FilePickerResultEvent):
+    #     selected_files.value = (
+    #         ", ".join(map(lambda f: f.name, e.files)) if e.files else "Cancelled!"
+    #     )
+    #     selected_files.update()
 
-    pick_files_dialog = ft.FilePicker(on_result=pick_files_result)
-    selected_files = ft.Text()
+    # pick_files_dialog = ft.FilePicker(on_result=pick_files_result)
+    # selected_files = ft.Text()
 
-    page.overlay.append(pick_files_dialog)
+    # page.overlay.append(pick_files_dialog)
     
     def insert_timestamp(event):
         pacifictime = datetime.now(ZoneInfo('America/Los_Angeles')).replace(tzinfo=None).isoformat(sep=" ",timespec="seconds")
@@ -138,19 +138,30 @@ def main(page: ft.Page):
         page.update()
     
     def create_input_field():
-        page.update()
         W,H = get_window_size()
         heightData = H
-        if heightData != H:
-            page.update
-        input_field = ft.TextField(
-            max_lines=20,
-            autocorrect=True, hint_text="Press Enter to Start Scribing!",height=H,
-            enable_suggestions=True, multiline=True,shift_enter=True, on_submit=insert_timestamp,show_cursor=True,border_width=0,adaptive=True,content_padding=0,
-            )
-        input_field.content_padding = 10
-        input_fields.append(input_field)
-        return input_field
+        if page.window_maximized == True:
+            input_field = ft.TextField(
+                max_lines=50,
+                autocorrect=True, hint_text="Press Enter to Start Scribing!",height=H,
+                enable_suggestions=True, multiline=True,shift_enter=True, on_submit=insert_timestamp,show_cursor=True,border_width=0,adaptive=True,content_padding=0,
+                )
+            input_field.content_padding = 10
+            input_fields.append(input_field)            
+            page.update()
+            return input_field
+        else:
+            
+            input_field = ft.TextField(
+                max_lines=20,
+                autocorrect=True, hint_text="Press Enter to Start Scribing!",height=H,
+                enable_suggestions=True, multiline=True,shift_enter=True, on_submit=insert_timestamp,show_cursor=True,border_width=0,adaptive=True,content_padding=0,
+                )
+            input_field.content_padding = 10
+            input_fields.append(input_field)
+            page.update()
+            return input_field
+        
     
     def check_tab_index(event,index):
         print(f"CLICKED & Index={index}")
@@ -175,20 +186,20 @@ def main(page: ft.Page):
             else:
                 print(f"Error: No input field exists at index {index}.")
 
-    def add_tab(event):
+    def add_tab(e):
         t = build_tab()
         
-        if len(tabs_list)<=8:
+        if len(tabs_list)<=4:
             try:
                 tabs_list.append(t)  
                 tabs_control.tabs = tabs_list  
                 tabs_control.selected_index = len(tabs_list) - 1
                 page.update()
-            except Exception as event:
+            except Exception as ex:
                 handle_errors[0]
         else:
-            open_adaptive_dialog(Exception)
-            return 0
+            open_adaptive_dialog(ex)
+        page.update()
 
     
     def close_tab(e, index):
@@ -224,7 +235,10 @@ def main(page: ft.Page):
         selected_index=0,
         animation_duration=300,
         tabs=tabs_list,
-        expand=1,    
+        indicator_border_radius=10,
+        indicator_color="RED",
+        indicator_padding=4, 
+        indicator_tab_size=8,
         )
     page.floating_action_button = ft.FloatingActionButton(
         icon=ft.icons.NOTE_ADD, on_click=add_tab, bgcolor=ft.colors.GREY_800
@@ -236,20 +250,19 @@ def main(page: ft.Page):
             tab_names[index] = input.value
     
     def number_to_words(number):
-        words = ["Zero", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten"]
+        words = ["One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten"]
         return " ".join(words[int(i)] for i in str(number))
 
     def build_tab():
-        
         new_tab = ft.Tab(tab_content=ft.Row([
-            ft.TextField(
-            f"{tab_names[0]} {number_to_words(len(tabs_list)+1)}",
-            on_submit=lambda e: name_current_tab(e,tabs_control.selected_index),width=175,border_width=1,border_radius=5,
-            disabled=False),
-            ]),
-            content=ft.Column([
-            create_input_field(),
-            ]))
+        ft.TextField(
+        hint_text=(f"{tab_names[tabs_control.selected_index]} {number_to_words(len(tabs_list))}"),
+        on_submit=lambda e: name_current_tab(e,tabs_control.selected_index),width=200,border_width=0,border_radius=5,
+        disabled=False,icon=ft.icons.TAB),
+        ]),
+        content=ft.Column([
+        create_input_field(),
+        ]))
         set_tab_name("Scribe Tab",tabs_control.selected_index)
         page.update()
         return new_tab
@@ -292,7 +305,7 @@ def main(page: ft.Page):
 
     adaptive_alert_dialog = ft.AlertDialog(
         adaptive=True,
-        content=ft.Text(f"{ErrorMessages[handle_errors]}\n\n Click away from this box to continue.",text_align="CENTER"),
+        content=ft.Text(f"{ErrorMessages[0]}\n\n Click away from this box to continue.",text_align="CENTER"),
         icon=ft.Icon(ft.icons.WARNING),
         title=ft.Text(f"WARNING!",text_align="CENTER"),
     )
