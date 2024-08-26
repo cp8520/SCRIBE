@@ -52,8 +52,8 @@ def main(page: ft.Page):
     # DarkMode.is_dark_mode_mac()
     page.window_min_height = 680
     page.window_min_width = 320
-    page.auto_scroll = False
-    page.window_opacity = 5
+    page.auto_scroll = True
+    page.window_opacity = 20
     page.window_frameless = True
     page.window_title_bar_hidden = True
     page.window_title_bar_buttons_hidden = True
@@ -64,6 +64,7 @@ def main(page: ft.Page):
     tabs_index = []
     input_fields = []
     tab_names = ["Scribe Tab"]
+    ErrorMessages = ["Too many tabs, close tabs first...", "No text field to copy..."]
     
     def set_tab_name(name, index):
         # Ensure index is an integer
@@ -79,10 +80,17 @@ def main(page: ft.Page):
             print("Index is out of the valid range.")
         page.update()
 
+    def handle_errors(i):
+        for i in ErrorMessages:
+            message = i
+            return int[i]
+        
+
     def get_window_size():
+        page.update()
         h = page.height
         w = page.width
-        page.update()
+        
         return w,h
 
     def open_adaptive_dialog(e):
@@ -130,14 +138,17 @@ def main(page: ft.Page):
         page.update()
     
     def create_input_field():
+        page.update()
         W,H = get_window_size()
         heightData = H
         if heightData != H:
             page.update
         input_field = ft.TextField(
-            min_lines=20,max_lines=20, autocorrect=True, hint_text="Click to Start Scribing!",height=H,
-            enable_suggestions=True, multiline=True,shift_enter=True, on_submit=insert_timestamp,show_cursor=True
+            max_lines=20,
+            autocorrect=True, hint_text="Press Enter to Start Scribing!",height=H,
+            enable_suggestions=True, multiline=True,shift_enter=True, on_submit=insert_timestamp,show_cursor=True,border_width=0,adaptive=True,content_padding=0,
             )
+        input_field.content_padding = 10
         input_fields.append(input_field)
         return input_field
     
@@ -152,6 +163,7 @@ def main(page: ft.Page):
                 create_input_field.value = "Copied"
                 page.update()
             else:
+                open_adaptive_dialog()
                 print(f"Error: No input field exists at index {index}.")
 
     def manipulate_input_field_paste(event, index):
@@ -165,10 +177,19 @@ def main(page: ft.Page):
 
     def add_tab(event):
         t = build_tab()
-        tabs_list.append(t)  
-        tabs_control.tabs = tabs_list  
-        tabs_control.selected_index = len(tabs_list) - 1
-        page.update()
+        
+        if len(tabs_list)<=8:
+            try:
+                tabs_list.append(t)  
+                tabs_control.tabs = tabs_list  
+                tabs_control.selected_index = len(tabs_list) - 1
+                page.update()
+            except Exception as event:
+                handle_errors[0]
+        else:
+            open_adaptive_dialog(Exception)
+            return 0
+
     
     def close_tab(e, index):
         if 0 <= index < len(tabs_list):
@@ -203,38 +224,45 @@ def main(page: ft.Page):
         selected_index=0,
         animation_duration=300,
         tabs=tabs_list,
-        expand=0,    
+        expand=1,    
         )
     page.floating_action_button = ft.FloatingActionButton(
-        icon=ft.icons.ADD, on_click=add_tab, bgcolor=ft.colors.GREY_800
+        icon=ft.icons.NOTE_ADD, on_click=add_tab, bgcolor=ft.colors.GREY_800
     )
     def name_current_tab(e,index):
-        input = ft.TextField(on_submit=lambda index: set_tab_name(input, index))
+        input = ft.TextField(on_submit=lambda e: set_tab_name(input, index))
         page.update()
         if 0 <= index < len(tabs_list)-1:
             tab_names[index] = input.value
+    
+    def number_to_words(number):
+        words = ["Zero", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten"]
+        return " ".join(words[int(i)] for i in str(number))
 
     def build_tab():
+        
         new_tab = ft.Tab(tab_content=ft.Row([
-            ft.TextButton(
-            f"{tab_names[0]}",
-            on_click=lambda e: name_current_tab(e,tabs_control.selected_index),
-            disabled=True)]),
-            content=ft.Column([    
+            ft.TextField(
+            f"{tab_names[0]} {number_to_words(len(tabs_list)+1)}",
+            on_submit=lambda e: name_current_tab(e,tabs_control.selected_index),width=175,border_width=1,border_radius=5,
+            disabled=False),
+            ]),
+            content=ft.Column([
             create_input_field(),
             ]))
         set_tab_name("Scribe Tab",tabs_control.selected_index)
+        page.update()
         return new_tab
 
     page.appbar = ft.AppBar(
     leading=ft.PopupMenuButton(tooltip="Menu",icon=ft.icons.MENU,items=[
                 # ft.PopupMenuItem(text="Add Tab",checked=False,on_click=lambda e: add_tab(e)),
-                # ft.PopupMenuItem(),
-                ft.PopupMenuItem(text="Remove Tab",checked=False,on_click=lambda e: close_tab(e,tabs_control.selected_index)),                
                 ft.PopupMenuItem(),
-                # ft.PopupMenuItem(text="Close All Tabs",checked=False,on_click=lambda e: close_tabs(e)),
+                ft.PopupMenuItem(text="Close Selected Tab",checked=False,on_click=lambda e: close_tab(e,tabs_control.selected_index)), 
+                ft.PopupMenuItem(),
+                ft.PopupMenuItem(text="Close All Tabs",checked=False,on_click=lambda e: close_tabs(e)),
                 ]),
-    leading_width=50,
+    leading_width=40,
     title=ft.WindowDragArea(ft.Container(ft.Text("SCRIBE"),padding=20)),
     center_title=True,
     bgcolor=ft.colors.SURFACE_VARIANT,
@@ -259,28 +287,19 @@ def main(page: ft.Page):
     ],
 )
 
-    actions = []
-    if page.platform in ["ios", "macos"]:
-        actions = [
-            ft.CupertinoDialogAction("OK"),
-            ft.CupertinoDialogAction("Cancel"),
-        ]
-    else:
-        actions = [ft.TextButton("OK",on_click=lambda e:name_current_tab(e,tabs_control.selected_index))]
-                
-    drag_area = ft.WindowDragArea(ft.Container(ft.Text("Drag this area to move, maximize and restore application window."), padding=10), expand=True),
+    drag_area = ft.WindowDragArea(ft.Container(ft.Text("Drag this area to move the application window."), padding=20),maximizable=False),
 
 
     adaptive_alert_dialog = ft.AlertDialog(
         adaptive=True,
-        title=ft.Text("Name this tab?"),
-        content=ft.TextField(show_cursor=True,multiline=False,max_lines=1,animate_size=2),
-        actions=actions,
+        content=ft.Text(f"{ErrorMessages[handle_errors]}\n\n Click away from this box to continue.",text_align="CENTER"),
+        icon=ft.Icon(ft.icons.WARNING),
+        title=ft.Text(f"WARNING!",text_align="CENTER"),
     )
-    add_tab_button = ft.IconButton(icon="PLAYLIST_ADD", on_click=lambda e: add_tab(e, build_tab))
-    add_close_app_button = ft.IconButton(icon="CLOSE", on_click=close_app,)
-    add_close_tab_button = ft.IconButton(icon="PLAYLIST_REMOVE", on_click=lambda e: close_tab(e,tabs_control.selected_index))
-
+    add_tab_button = ft.IconButton(ft.icons.ADD_TASK, on_click=lambda e: add_tab(e, build_tab))
+    add_close_app_button = ft.IconButton(ft.icons.CLOSE, on_click=close_app,)
+    add_close_tab_button = ft.IconButton(ft.icons.CLOSE_OUTLINED, on_click=lambda e: close_tab(e,tabs_control.selected_index))
+    
     page.add(ft.Container(tabs_control, padding=10)
 )
 
