@@ -93,7 +93,7 @@ def main(page: ft.Page):
                 create_input_field.value = "Copied"
                 page.update()
             else:
-                open_adaptive_dialog()
+                open_adaptive_dialog(1)
                 print(f"Error: No input field exists at index {index}.")
 
     def input_field_paste(event, index):
@@ -104,8 +104,19 @@ def main(page: ft.Page):
                 target_field.value = pyperclip.paste()
                 page.update()
             else:
-                open_adaptive_dialog()
+                open_adaptive_dialog(1)
                 print(f"Error: No input field exists at index {index}.")
+
+    def input_field_cut(event, index):
+         index = tabs_control.selected_index
+         if 0 <= index < len(input_fields):
+            target_field = input_fields[index]
+            if target_field:
+                target_field.value = pyperclip.cut()
+                page.update()
+            else:
+                open_adaptive_dialog(1)
+                print()
 
     def open_adaptive_dialog(e):
         page.dialog = adaptive_alert_dialog
@@ -120,7 +131,7 @@ def main(page: ft.Page):
                 ft.IconButton(ft.icons.CONTENT_COPY,on_click=lambda e: input_field_copy(e,tabs_control.selected_index),on_focus=ft.icons.COPY_ALL_OUTLINED),
                 # ft.IconButton(ft.icons.CUT),
                 ft.IconButton(ft.icons.PASTE,on_click=lambda e: input_field_paste(e,tabs_control.selected_index),on_focus=ft.icons.PASTE_OUTLINED),
-                ft.IconButton(ft.icons.CUT,on_click=lambda e: input_field_paste(e,tabs_control.selected_index),on_focus=ft.icons.CUT_OUTLINED),
+                ft.IconButton(ft.icons.CUT,on_click=lambda e: input_field_cut(e,tabs_control.selected_index),on_focus=ft.icons.CUT_OUTLINED),
                 ft.IconButton(ft.icons.COLORIZE,on_click=lambda e: input_field_paste(e,tabs_control.selected_index),on_focus=ft.icons.COLORIZE),
                 ft.IconButton(ft.icons.SUMMARIZE,on_click=lambda e: input_field_paste(e,tabs_control.selected_index),on_focus=ft.icons.SUMMARIZE),
                 ft.IconButton(ft.icons.SPELLCHECK,on_click=lambda e: input_field_paste(e,tabs_control.selected_index),on_focus=ft.icons.SPELLCHECK),
