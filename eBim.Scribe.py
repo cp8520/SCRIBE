@@ -119,10 +119,10 @@ def main(page: ft.Page):
                 ft.IconButton(ft.icons.CONTENT_COPY,on_click=lambda e: input_field_copy(e,tabs_control.selected_index),on_focus=ft.icons.COPY_ALL_OUTLINED),
                 # ft.IconButton(ft.icons.CUT),
                 ft.IconButton(ft.icons.PASTE,on_click=lambda e: input_field_paste(e,tabs_control.selected_index),on_focus=ft.icons.PASTE_OUTLINED),
-                ft.IconButton(ft.icons.PASTE,on_click=lambda e: input_field_paste(e,tabs_control.selected_index),on_focus=ft.icons.CUT_OUTLINED),
-                ft.IconButton(ft.icons.PASTE,on_click=lambda e: input_field_paste(e,tabs_control.selected_index),on_focus=ft.icons.COLORIZE),
-                ft.IconButton(ft.icons.PASTE,on_click=lambda e: input_field_paste(e,tabs_control.selected_index),on_focus=ft.icons.SUMMARIZE),
-                ft.IconButton(ft.icons.PASTE,on_click=lambda e: input_field_paste(e,tabs_control.selected_index),on_focus=ft.icons.SPELLCHECK),
+                ft.IconButton(ft.icons.CUT,on_click=lambda e: input_field_paste(e,tabs_control.selected_index),on_focus=ft.icons.CUT_OUTLINED),
+                ft.IconButton(ft.icons.COLORIZE,on_click=lambda e: input_field_paste(e,tabs_control.selected_index),on_focus=ft.icons.COLORIZE),
+                ft.IconButton(ft.icons.SUMMARIZE,on_click=lambda e: input_field_paste(e,tabs_control.selected_index),on_focus=ft.icons.SUMMARIZE),
+                ft.IconButton(ft.icons.SPELLCHECK,on_click=lambda e: input_field_paste(e,tabs_control.selected_index),on_focus=ft.icons.SPELLCHECK),
                 
             ]))
             page.snack_bar.open = True
