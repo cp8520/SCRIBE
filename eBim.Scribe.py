@@ -92,7 +92,7 @@ def main(page: ft.Page):
                 create_input_field.value = "Copied"
                 page.update()
             else:
-                open_adaptive_dialog()
+                open_adaptive_dialog(1)
                 print(f"Error: No input field exists at index {index}.")
 
     def input_field_paste(event, index):
@@ -129,9 +129,14 @@ def main(page: ft.Page):
         words = ["One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten"]
         return " ".join(words[int(i)] for i in str(number))
     
+    def handle_error(number):
+         error_code = error_messages[number]
+         return error_code
+
+    
     adaptive_alert_dialog = ft.AlertDialog(
         adaptive=True,
-        content=ft.Text(f"{error_messages[0]}\n\n Click away from this box to continue.",text_align="CENTER"),
+        content=ft.Text(f"{handle_error}\n\n Click away from this box to continue.",text_align="CENTER"),
         icon=ft.Icon(ft.icons.WARNING),
         title=ft.Text(f"WARNING!",text_align="CENTER"),
         )
@@ -180,9 +185,11 @@ def main(page: ft.Page):
                     tabs_control.selected_index = len(tabs_list) - 1
                     page.update()
                 except Exception as ex:
-                    print("Something went wrong.")
+                    print(f"An error occurred: {ex}")
+                    open_adaptive_dialog(ex)
             else:
-                open_adaptive_dialog(e)
+                # open_adaptive_dialog(ex)
+                print(f"An error ocurred: {ex}")
             page.update()
         
     def close_tab(e, index):
