@@ -112,7 +112,8 @@ def main(page: ft.Page):
          if 0 <= index < len(input_fields):
             target_field = input_fields[index]
             if target_field:
-                target_field.value = pyperclip.cut()
+                target_field.value = pyperclip.copy()
+                input_fields.clear(index)
                 page.update()
             else:
                 open_adaptive_dialog(1)
