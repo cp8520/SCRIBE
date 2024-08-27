@@ -108,16 +108,16 @@ def main(page: ft.Page):
                 print(f"Error: No input field exists at index {index}.")
 
     def input_field_cut(event, index):
-         index = tabs_control.selected_index
-         if 0 <= index < len(input_fields):
-            target_field = input_fields[index]
-            if target_field:
-                target_field.value = pyperclip.copy(target_field)
-                input_fields.clear(index)
+        if 0 <= index < len(input_fields):
+            field_to_copy = input_fields[index]
+            if field_to_copy:
+                pyperclip.copy(field_to_copy.value)
+                create_input_field.value = "Copied"
+                field_to_copy.clear
                 page.update()
             else:
                 open_adaptive_dialog(1)
-                print()
+                print(f"Error: No input field exists at index {index}.")
 
     def open_adaptive_dialog(e):
         page.dialog = adaptive_alert_dialog
