@@ -112,7 +112,7 @@ def main(page: ft.Page):
          if 0 <= index < len(input_fields):
             target_field = input_fields[index]
             if target_field:
-                target_field.value = pyperclip.copy()
+                target_field.value = pyperclip.copy(target_field)
                 input_fields.clear(index)
                 page.update()
             else:
