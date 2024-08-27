@@ -21,6 +21,8 @@ def main(page: ft.Page):
 
     input_fields = []
 
+    last_error_code = int
+
     tab_names = [
          "NoteTab"
          ]
@@ -43,6 +45,11 @@ def main(page: ft.Page):
         )
 
     col = ft.Column(horizontal_alignment=ft.MainAxisAlignment.END,spacing=3)
+
+    def handle_errors(number):
+         index = number
+         return index
+         
 
     def get_window_size():
         page.update()
@@ -92,7 +99,7 @@ def main(page: ft.Page):
                 create_input_field.value = "Copied"
                 page.update()
             else:
-                open_adaptive_dialog(1)
+                open_adaptive_dialog()
                 print(f"Error: No input field exists at index {index}.")
 
     def input_field_paste(event, index):
@@ -129,14 +136,9 @@ def main(page: ft.Page):
         words = ["One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten"]
         return " ".join(words[int(i)] for i in str(number))
     
-    def handle_error(number):
-         error_code = error_messages[number]
-         return error_code
-
-    
     adaptive_alert_dialog = ft.AlertDialog(
         adaptive=True,
-        content=ft.Text(f"{handle_error}\n\n Click away from this box to continue.",text_align="CENTER"),
+        content=ft.Text(f"{error_messages[last_error_code]}\n\n Click away from this box to continue.",text_align="CENTER"),
         icon=ft.Icon(ft.icons.WARNING),
         title=ft.Text(f"WARNING!",text_align="CENTER"),
         )
@@ -178,18 +180,16 @@ def main(page: ft.Page):
     def add_tab(e):
             t = build_tab()
             
-            if len(tabs_list)<=4:
+            if len(tabs_list)<=9:
                 try:
                     tabs_list.append(t)  
                     tabs_control.tabs = tabs_list  
                     tabs_control.selected_index = len(tabs_list) - 1
                     page.update()
                 except Exception as ex:
-                    print(f"An error occurred: {ex}")
-                    open_adaptive_dialog(ex)
+                    print("Something went wrong.")
             else:
-                # open_adaptive_dialog(ex)
-                print(f"An error ocurred: {ex}")
+                open_adaptive_dialog(e)
             page.update()
         
     def close_tab(e, index):
