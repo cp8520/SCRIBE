@@ -21,8 +21,6 @@ def main(page: ft.Page):
 
     input_fields = []
 
-    last_error_code = int
-
     tab_names = [
          "NoteTab"
          ]
@@ -45,11 +43,7 @@ def main(page: ft.Page):
         )
 
     col = ft.Column(horizontal_alignment=ft.MainAxisAlignment.END,spacing=3)
-
-    def handle_errors(number):
-         index = number
-         return index
-         
+    
 
     def get_window_size():
         page.update()
@@ -138,7 +132,7 @@ def main(page: ft.Page):
     
     adaptive_alert_dialog = ft.AlertDialog(
         adaptive=True,
-        content=ft.Text(f"{error_messages[last_error_code]}\n\n Click away from this box to continue.",text_align="CENTER"),
+        content=ft.Text(f"{error_messages[0]}\n\n Click away from this box to continue.",text_align="CENTER"),
         icon=ft.Icon(ft.icons.WARNING),
         title=ft.Text(f"WARNING!",text_align="CENTER"),
         )
@@ -237,6 +231,8 @@ def main(page: ft.Page):
         ft.PopupMenuItem(text="Connect API",on_click=print("CLICKED API BUTTON"),icon=ft.icons.API,),
         ft.PopupMenuItem(),        
         ft.PopupMenuItem(text="Connect AI",on_click=print("CLICKED AI BUTTON"),icon=ft.icons.SMART_BUTTON,),
+        ft.PopupMenuItem(),        
+        ft.PopupMenuItem(text="Relay Tool",on_click=print("CLICKED RELAY TOOL BUTTON"),icon=ft.icons.VIEW_AGENDA,),
         ft.PopupMenuItem(),        
         ft.PopupMenuItem(text="Preferences",on_click=print("CLICKED PREFERENCES BUTTON"),icon=ft.icons.SETTINGS,),
         ft.PopupMenuItem(),
