@@ -104,6 +104,7 @@ def main(page: ft.Page):
                 target_field.value = pyperclip.paste()
                 page.update()
             else:
+                open_adaptive_dialog()
                 print(f"Error: No input field exists at index {index}.")
 
     def open_adaptive_dialog(e):
