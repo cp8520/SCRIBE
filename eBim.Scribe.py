@@ -21,11 +21,14 @@ def main(page: ft.Page):
 
     input_fields = []
 
+
     tab_names = [
          "NoteTab"
          ]
     
     welcome_message = ["Welcome to Scribe!\n\nBy Christian Paustell\nVersion 1.1.27"]
+
+    error_code = int
 
     error_messages = [
          "Too many tabs, close tabs first...", 
@@ -43,7 +46,8 @@ def main(page: ft.Page):
         )
 
     col = ft.Column(horizontal_alignment=ft.MainAxisAlignment.END,spacing=3)
-    
+
+    row = ft.Row(vertical_alignment=ft.MainAxisAlignment.END,spacing=3)
 
     def get_window_size():
         page.update()
@@ -113,7 +117,6 @@ def main(page: ft.Page):
             if field_to_copy:
                 pyperclip.copy(field_to_copy.value)
                 create_input_field.value = "Copied"
-                field_to_copy.clear
                 page.update()
             else:
                 open_adaptive_dialog(1)
@@ -132,10 +135,10 @@ def main(page: ft.Page):
                 ft.IconButton(ft.icons.CONTENT_COPY,on_click=lambda e: input_field_copy(e,tabs_control.selected_index),on_focus=ft.icons.COPY_ALL_OUTLINED),
                 # ft.IconButton(ft.icons.CUT),
                 ft.IconButton(ft.icons.PASTE,on_click=lambda e: input_field_paste(e,tabs_control.selected_index),on_focus=ft.icons.PASTE_OUTLINED),
-                ft.IconButton(ft.icons.CUT,on_click=lambda e: input_field_cut(e,tabs_control.selected_index),on_focus=ft.icons.CUT_OUTLINED),
-                ft.IconButton(ft.icons.COLORIZE,on_click=lambda e: input_field_paste(e,tabs_control.selected_index),on_focus=ft.icons.COLORIZE),
-                ft.IconButton(ft.icons.SUMMARIZE,on_click=lambda e: input_field_paste(e,tabs_control.selected_index),on_focus=ft.icons.SUMMARIZE),
-                ft.IconButton(ft.icons.SPELLCHECK,on_click=lambda e: input_field_paste(e,tabs_control.selected_index),on_focus=ft.icons.SPELLCHECK),
+                # ft.IconButton(ft.icons.CUT,on_click=lambda e: input_field_cut(e,tabs_control.selected_index),on_focus=ft.icons.CUT_OUTLINED),
+                # ft.IconButton(ft.icons.COLORIZE,on_click=lambda e: input_field_paste(e,tabs_control.selected_index),on_focus=ft.icons.COLORIZE),
+                # ft.IconButton(ft.icons.SUMMARIZE,on_click=lambda e: input_field_paste(e,tabs_control.selected_index),on_focus=ft.icons.SUMMARIZE),
+                # ft.IconButton(ft.icons.SPELLCHECK,on_click=lambda e: input_field_paste(e,tabs_control.selected_index),on_focus=ft.icons.SPELLCHECK),
                 
             ]))
             page.snack_bar.open = True
@@ -162,8 +165,8 @@ def main(page: ft.Page):
             disabled=False,)
             ]),
             content=ft.Column([col,ft.IconButton(icon=ft.icons.CLOSE,on_click=lambda e: close_tab(e,tabs_control.selected_index)),
-            create_input_field()
-            ]))
+            create_input_field()]
+            ))
             set_tab_name("NoteTab",tabs_control.selected_index)
             page.update()
             return new_tab
