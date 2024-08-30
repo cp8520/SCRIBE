@@ -158,14 +158,13 @@ def main(page: ft.Page):
         )
     
     def build_tab():
-            new_tab = ft.Tab(tab_content=ft.Row([
+            new_tab = ft.Tab(tab_content=ft.Row([ft.IconButton(icon=ft.icons.CLOSE,on_click=lambda e: close_tab(e,tabs_control.selected_index)),
             ft.TextField(dense=True,filled=True,focused_border_width=1,border=False,text_align="LEFT",prefix_icon=ft.icons.TAB,text_size=18,max_lines=1,scale=.8,
             hint_text=(f"{tab_names[tabs_control.selected_index]} {number_to_words(len(tabs_list))}"),
             on_submit=lambda e: name_current_tab(e,tabs_control.selected_index),width=200,border_width=0,border_radius=5,
             disabled=False,)
             ]),
-            content=ft.Column([col,ft.IconButton(icon=ft.icons.CLOSE,on_click=lambda e: close_tab(e,tabs_control.selected_index)),
-            create_input_field()]
+            content=ft.Column([create_input_field()]
             ))
             set_tab_name("NoteTab",tabs_control.selected_index)
             page.update()
