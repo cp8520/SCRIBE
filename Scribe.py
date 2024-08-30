@@ -206,7 +206,7 @@ def main(page: ft.Page):
             page.update()
         
     def close_tab(e, index):
-        if 0<= index < len(tabs_list):
+        if 0 <= index < len(tabs_list):
             try:
                 tabs_list.pop(index)
                 
