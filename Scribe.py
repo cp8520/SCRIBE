@@ -3,6 +3,7 @@ import flet as ft
 import pyperclip
 from zoneinfo import ZoneInfo
 from datetime import datetime
+
 class app_settings:
      selected_indicator_color = int
 
