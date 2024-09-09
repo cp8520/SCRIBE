@@ -128,7 +128,7 @@ class ErrorHandler:
         dlg_modal = ft.AlertDialog(title=row,content_padding=20,actions=[xmark],modal=True,on_dismiss=lambda self: self.page.close(dlg_modal),actions_alignment=ft.MainAxisAlignment.CENTER)
         return dlg_modal
     
-class DataHandler:
+class DataHandler(Observer):
     def __init__(self, page: ft.Page):
         self.page = page
         self.time_gen = TimestampGenerator
@@ -147,11 +147,9 @@ class DataHandler:
 
     def save_preferences(self,text):
         t = text
-        i = []
-        filename = "user_prefs.pkl"
-        i.append(t)
+        filename = "user_prefs"
         with open(f"{filename}.pkl","wb") as f:
-            pickle.dump(i, f)
+            pickle.dump(t, f)
 
     def update_index(filename):
         index_filename = "index.pkl"
@@ -172,7 +170,12 @@ class DataHandler:
         with open(f"text.pkl","rb") as f:
             i = pickle.load(f)
             return i
-        
+    
+    def load_color_prefs(self):
+        with open("user_prefs.pkl", "rb") as f:
+            color_prefs = pickle.load(f)
+            print(f"{color_prefs}")
+        return ft.Text(value=color_prefs).value
 
 
 class ColorSelector:
@@ -201,29 +204,34 @@ class ColorSelector:
 class ScribeTabs(Observer):
     def __init__(self, page: ft.Page):
         self.page = page
-        # self.api_service = ApiService("https://api.example.com")
+        # self.api_service = ApiService("https://api.example.com")        
+        self.err = ErrorHandler.throw
+        self.confirm_close = ErrorHandler.safety_net
+        self.save = DataHandler.save_text
+        self.save_prefs = DataHandler.save_preferences
+        self.load = DataHandler.load_text
+        self.load_color = DataHandler.load_color_prefs
         self.time = TimestampGenerator
         self.tabs_list = []
         self.input_fields_list = []
         self.close_buttons_list = []
+        self.loaded_color = self.load_color(self)            
+        self.c = self.loaded_color
         self.tabs_control = ft.Tabs(
             selected_index=0,
             tabs=self.tabs_list,
-            indicator_color=ft.colors.BLUE,
-            label_color=ft.colors.BLUE,
-            overlay_color=ft.colors.BLUE_900,
-            divider_color=ft.colors.BLUE_900,
-            indicator_padding=5,
+            indicator_padding=5,            
+            indicator_color=self.c,
+            label_color=self.c,
+            overlay_color=f"{self.c}900",
+            divider_color=f"{self.c}900",
             scrollable = True,
             animation_duration=800,
             right=True
         )
         self.color_list = ["RED","YELLOW","GREEN", "BLUE","INDIGO","SURFACE_VARIANT"]
         self.current_color_index = 0
-        self.err = ErrorHandler.throw
-        self.confirm_close = ErrorHandler.safety_net
-        self.save = DataHandler.save_text
-        self.load = DataHandler.load_text
+
 
     def update(self):
         self.page.update()
@@ -233,6 +241,9 @@ class ScribeTabs(Observer):
         self.tabs_control.label_color = color
         self.tabs_control.overlay_color = f"{color}900"
         self.tabs_control.divider_color = f"{color}900"
+        self.save_prefs(self,color)
+        self.load_color(self)
+        print(f"{color}")
         self.update()    
         
     def set_text_color(self,color):
@@ -291,6 +302,7 @@ class ScribeTabs(Observer):
                 self.page.open(self.err(f"EXCEPTION @ remove saved tab: {ex}"))
 
     def close_tab(self,e,tab):
+        self.save_prefs(self,self.tabs_control.indicator_color)
         self.tabs_list.remove(tab)
         self.tabs_control.tabs = self.tabs_list
         self.page.update()
@@ -298,6 +310,7 @@ class ScribeTabs(Observer):
 
     def add_tab(self, e):
         tc = self.tabs_control
+
         if len(tc.tabs) < 50:
             try:
                 new_index_position = len(self.tabs_list)
@@ -327,7 +340,6 @@ class ScribeTabs(Observer):
     def generate_tab(self, index, content=None):
         # Generate timestamp
         t = TimestampGenerator(self.page).generate_timestamp
-        
         name_tab_field = ft.TextField(
             hint_text=f"Scribe Tab",
             width=100, border_width=0, content_padding=1
@@ -359,6 +371,7 @@ class ScribeTabs(Observer):
                 ft.ResponsiveRow([ft.Column([tab_content])], rtl=False, alignment=ft.MainAxisAlignment.SPACE_EVENLY, expand=True, run_spacing=1)
             )
         )
+        self.page.update()
         return tab
     
     def add_prefs_tab(self, e):
@@ -502,7 +515,6 @@ def main(page: ft.Page):
     page.window_frameless = True
     page.window_title_bar_buttons_hidden = True
     page.window_title_bar_hidden = True
-
     subject = Subject()
     data_handler = DataHandler(page)
     observer1 = ScribeTabs(page)
@@ -512,6 +524,7 @@ def main(page: ft.Page):
     subject.add_observer(observer1)
     subject.add_observer(observer2)
     subject.add_observer(observer3)
+    subject.add_observer(data_handler)
 
 
     def on_fetch_data_button_click(e):
@@ -557,8 +570,8 @@ def main(page: ft.Page):
                 items=[
                     # ft.PopupMenuItem(text="Configuration",icon=ft.icons.SETTINGS,on_click=on_edit_configuration_button_click),
                     # ft.PopupMenuItem(),  # divider
-                    # ft.PopupMenuItem(text="Preferences",icon=ft.icons.EDIT,on_click=on_edit_preferences_button_click),                    
-                    # ft.PopupMenuItem(),  # divider                    
+                    ft.PopupMenuItem(text="Preferences",icon=ft.icons.EDIT,on_click=on_edit_preferences_button_click),                    
+                    ft.PopupMenuItem(),  # divider                    
                     ft.PopupMenuItem(text="History", icon=ft.icons.FILE_OPEN, on_click=lambda _: observer3.pick_files_dialog.pick_files(allow_multiple=False)),
                     ft.PopupMenuItem(),  # divider
                     ft.PopupMenuItem(text="Close Application",icon=ft.icons.CLOSE_ROUNDED,on_click=on_close_window_button_click),
