@@ -555,10 +555,10 @@ def main(page: ft.Page):
         actions=[
             ft.PopupMenuButton(
                 items=[
-                    ft.PopupMenuItem(text="Configuration",icon=ft.icons.SETTINGS,on_click=on_edit_configuration_button_click),
-                    ft.PopupMenuItem(),  # divider
-                    ft.PopupMenuItem(text="Preferences",icon=ft.icons.EDIT,on_click=on_edit_preferences_button_click),                    
-                    ft.PopupMenuItem(),  # divider                    
+                    # ft.PopupMenuItem(text="Configuration",icon=ft.icons.SETTINGS,on_click=on_edit_configuration_button_click),
+                    # ft.PopupMenuItem(),  # divider
+                    # ft.PopupMenuItem(text="Preferences",icon=ft.icons.EDIT,on_click=on_edit_preferences_button_click),                    
+                    # ft.PopupMenuItem(),  # divider                    
                     ft.PopupMenuItem(text="History", icon=ft.icons.FILE_OPEN, on_click=lambda _: observer3.pick_files_dialog.pick_files(allow_multiple=False)),
                     ft.PopupMenuItem(),  # divider
                     ft.PopupMenuItem(text="Close Application",icon=ft.icons.CLOSE_ROUNDED,on_click=on_close_window_button_click),
