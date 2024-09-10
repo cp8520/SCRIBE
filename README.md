@@ -1,8 +1,8 @@
 Thank you for downloading SCRIBE! Scribe is a notetaking tool that provides an updated timestamp in the ISO format in the PST timezone. Press copy & clear to copy the notes to your clipboard so you can paste them elsewhere. You can also paste them back in, select the text on-screen and paste your clipboard for a seamless handoff.
 
-To run SCRIBE, simply download the latest release from the releases tab from here:[GoogleDrive/Scribe](https://drive.google.com/file/d/1YrX0Ex4Xd4GkGvx-XOl9OFQl5lkZ_PNU/view?usp=sharing). After the download is complete, extract the file and double click the .py file to run! You shouldn't need to install the application.
+To run SCRIBE, simply download the latest release from the releases tab from here:[GoogleDrive/Scribe](https://drive.google.com/file/d/1YrX0Ex4Xd4GkGvx-XOl9OFQl5lkZ_PNU/view?usp=sharing). After the download is complete, extract the file and double click the .exe file to run! No need to install the application.
 
-If you wish to run via an executable file, you will need to compile the program yourself. Depending on the OS you're using, will determine the steps you need to take.
+If you wish to compile the program yourself. Depending on the OS you're using, will determine the steps you need to take.
 
 First, regardless of your OS you will need to have these pre-requisites: 
 1. Python 3.11.4 or below (there is a issue in python 3.11.5 with the module pyimod2_importers). You can install python 3.11.4 using this link: https://www.python.org/downloads/release/python-3114/ (Scroll down to Files to find download). Make sure to check the "Add to Path" box at the start of the installation.
