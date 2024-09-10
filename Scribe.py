@@ -101,7 +101,7 @@ class ScribeTabs(Observer):
         self.load_color = DataHandler.load_color_prefs
         self.time = TimestampGenerator
         self.tabs_list = []
-        self.input_fields_list = []
+        self.input_fields = []
         self.close_buttons_list = []
         self.loaded_color = self.load_color(self)            
         self.c = self.loaded_color
@@ -131,8 +131,11 @@ class ScribeTabs(Observer):
         self.tabs_control.divider_color = f"{color}900"
         self.save_prefs(self,color)
         self.load_color(self)
+        for self.input_field in self.input_fields:
+            self.input_field.color = color
+            self.page.update()
         print(f"{color}")
-        self.update()    
+        self.page.update()    
         
 
     def fetch_data(self, e):
@@ -152,7 +155,7 @@ class ScribeTabs(Observer):
         return tab_container
 
     def get_input_indexes_with_value(self):
-        index = self.input_fields_list
+        index = self.input_fields
         for i in index:
             try:
                 print("Something?")
@@ -206,10 +209,9 @@ class ScribeTabs(Observer):
             max_lines=20, dense=True, border_width=0, adaptive=True,
             value=content if content else "",  # Use content if provided
             color=self.tabs_control.indicator_color,
-            hint_style=ft.TextStyle(color=self.tabs_control.indicator_color)
         )
 
-        self.input_fields_list.append(input_field)
+        self.input_fields.append(input_field)
         
         close_button = ft.IconButton(
             icon=ft.icons.CLOSE, on_click=lambda e: self.close_scribe_tab(e, tab),
@@ -239,7 +241,7 @@ class ScribeTabs(Observer):
                 new_index_position = len(self.tabs_list)
                 t = self.generate_prefs_tab(new_index_position)
                 tc.tabs.append(t)
-                self.input_fields_list.append(dummy_field)
+                self.input_fields.append(dummy_field)
                 self.tabs_list = tc.tabs
                 self.page.update()
                 print(f"new index pos = {new_index_position}\nlength of tabs list = {len(self.tabs_list)}")
@@ -290,7 +292,7 @@ class ScribeTabs(Observer):
                 new_index_position = len(self.tabs_list)
                 t = self.generate_config_tab(new_index_position)
                 tc.tabs.append(t)
-                self.input_fields_list.append(dummy_field)
+                self.input_fields.append(dummy_field)
                 self.tabs_list = tc.tabs
                 self.page.update()
             except Exception as ex:
@@ -325,13 +327,13 @@ class ScribeTabs(Observer):
         
     def close_scribe_tab(self, e, tab):
         tab_index = self.tabs_list.index(tab)
-        input_index = self.input_fields_list[tab_index]
+        input_index = self.input_fields[tab_index]
         time = self.time.plain_time()
         t = ft.Text(value=time).value
         if len(input_index.value)<=0:
             try:
                 self.tabs_list.remove(tab)
-                self.input_fields_list.remove(input_index)
+                self.input_fields.remove(input_index)
                 self.tabs_control.tabs = self.tabs_list
                 self.page.update()
             except Exception as ex:
@@ -340,7 +342,7 @@ class ScribeTabs(Observer):
             try:
                 self.save(self,input_index.value)
                 self.tabs_list.remove(tab)
-                self.input_fields_list.remove(input_index)
+                self.input_fields.remove(input_index)
                 self.tabs_control.tabs = self.tabs_list
                 self.page.update()
                 self.page.open(self.confirm_close(f"Tab data was saved to history!"))
@@ -352,7 +354,7 @@ class ScribeTabs(Observer):
         self.max_other_tabs-=1
         self.save_prefs(self,self.tabs_control.indicator_color)
         self.tabs_list.remove(tab)
-        self.input_fields_list.pop()
+        self.input_fields.pop()
         self.tabs_control.tabs = self.tabs_list
         self.page.update()
 
