@@ -117,14 +117,14 @@ class ScribeTabs(Observer):
             animation_duration=800,
             right=True
         )
-        self.color_list = ["RED","YELLOW","GREEN", "BLUE","INDIGO","SURFACE_VARIANT"]
+        self.color_list = ["RED","ORANGE","YELLOW","GREEN","BLUE","INDIGO","PURPLE","SURFACE_VARIANT"]
         self.current_color_index = 0
         self.max_other_tabs = 0
 
     def update(self):
         self.page.update()
 
-    def set_tab_color(self,color):
+    def set_theme_color(self,color):
         self.tabs_control.indicator_color = color
         self.tabs_control.label_color = color
         self.tabs_control.overlay_color = f"{color}900"
@@ -205,6 +205,8 @@ class ScribeTabs(Observer):
             content_padding=20, show_cursor=True,
             max_lines=20, dense=True, border_width=0, adaptive=True,
             value=content if content else "",  # Use content if provided
+            color=self.tabs_control.indicator_color,
+            hint_style=ft.TextStyle(color=self.tabs_control.indicator_color)
         )
 
         self.input_fields_list.append(input_field)
@@ -493,7 +495,7 @@ class ColorSelector:
         self.current_color_index = (self.current_color_index + 1) % len(self.color_list)
         new_color = self.color_list[self.current_color_index]
         color_storage = new_color
-        ScribeTabs.set_tab_color(self,new_color)
+        ScribeTabs.set_theme_color(self,new_color)
         self.update()
 
 def main(page: ft.Page):
