@@ -296,7 +296,7 @@ class ScribeTabs(Observer):
     def add_config_tab(self, e):
         tc = self.tabs_control
         dummy_field = ft.TextField()
-        if max_other_tabs <= 0 and len(tc.tabs) < 50:
+        if self.max_other_tabs <= 0 and len(tc.tabs) < 50:
             try:
                 new_index_position = len(self.tabs_list)
                 t = self.generate_config_tab(new_index_position)
