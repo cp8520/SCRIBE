@@ -461,7 +461,6 @@ class DataHandler(Observer):
                 color_prefs = pickle.dump(color,f)
         return ft.Text(value=color_prefs).value
 
-
 class FileSelector(Observer):
     def __init__(self, page: ft.Page, data_handler: DataHandler, scribe_tabs: ScribeTabs):
         self.page = page
@@ -566,7 +565,6 @@ def main(page: ft.Page):
     tab_container = ft.Container(
         observer1.generate_tab_container()
         )
-    
     app_bar = ft.AppBar(
         leading=ft.Icon(
             ft.icons.NOTE_ALT
@@ -596,7 +594,10 @@ def main(page: ft.Page):
                 ]
             ),
         ],)
+    
+    window = ft.Container(content=ft.Column(controls=[ft.Row([add_tab_button])]))
+    pagelet = ft.Pagelet(appbar=app_bar,content=tab_container,adaptive=True)
 
-    page.add(app_bar, add_tab_button, tab_container)
+    page.add(pagelet,add_tab_button)
 
 ft.app(target=main)
