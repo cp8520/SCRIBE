@@ -135,7 +135,8 @@ class ScribeTabs(Observer):
             self.input_field.color = color
             self.page.update()
         print(f"{color}")
-        self.page.update()    
+        self.page.update()  
+        self.update()  
         
 
     def fetch_data(self, e):
