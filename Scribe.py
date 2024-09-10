@@ -134,11 +134,6 @@ class ScribeTabs(Observer):
         print(f"{color}")
         self.update()    
         
-    def set_text_color(self,color):
-        index = self.input_fields_list
-        for i in index:
-            i.text_color = ft.colors.GREEN
-        self.update()
 
     def fetch_data(self, e):
         # Example API call
@@ -263,22 +258,14 @@ class ScribeTabs(Observer):
         )
         tab_icon = ft.Icon(ft.icons.EDIT,scale=.75)
         tab_color_select_button = ft.TextButton(
-                        "Tab Indicator Color",
+                        "Color Theme",
                         icon=ft.icons.COLOR_LENS,
-                        icon_color=self.tabs_control.overlay_color,
                         on_click=lambda e: cs.cycle_tab_colors(self,e, self.tabs_control.indicator_color),   
-                    )
-        text_color_select_button = ft.TextButton(
-                        "Text Color",
-                        icon=ft.icons.FORMAT_COLOR_TEXT,
-                        icon_color=self.tabs_control.overlay_color,
-                        on_click=lambda e: cs.cycle_text_colors(self,e, self.tabs_control.indicator_color),
-                        
                     )
         if self.page.window_full_screen is False:
             tab_content = ft.Container(
                 content=ft.Container(
-                    content=ft.Column([tab_color_select_button,text_color_select_button]),padding=20
+                    content=ft.Column([tab_color_select_button]),padding=20
                 )
             )
             self.page.update()
@@ -507,13 +494,6 @@ class ColorSelector:
         new_color = self.color_list[self.current_color_index]
         color_storage = new_color
         ScribeTabs.set_tab_color(self,new_color)
-        self.update()
-
-    def cycle_text_colors(self,e,color_storage):
-        self.current_color_index = (self.current_color_index+1)%len(self.color_list)
-        new_color = self.color_list[self.current_color_index]
-        color_storage = new_color
-        ScribeTabs.set_text_color(self,new_color)
         self.update()
 
 def main(page: ft.Page):
