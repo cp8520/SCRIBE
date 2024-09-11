@@ -121,8 +121,15 @@ class ScribeTabs(Observer):
         self.current_color_index = 0
         self.max_other_tabs = 0
 
+
     def update(self):
         self.page.update()
+    
+    def set_opacity(self,e,value):
+        if value >= self.min_opacity or value <= self.max_opacity:
+            ft.Window.opacity = value
+            print(f"Opacity={value}")
+            self.page.update()
 
     def set_theme_color(self,color):
         self.tabs_control.indicator_color = color
@@ -250,8 +257,17 @@ class ScribeTabs(Observer):
                 self.page.open(self.err(f"EXCEPTION: {ex}"))
         else:
             self.page.open(self.err("Max amount of tabs reached!"))
+    def on_slider_value_change(self,e):
+        newval = e.control.value / 100  # Slider returns values from 0 to 100, opacity needs to be between 0 and 1
+        self.page.window_opacity = newval
+        self.page.update()
 
     def generate_prefs_tab(self, index):
+
+        value_slider = ft.Slider(label="{value}%",min=50, max=100, divisions=10, value=100, on_change_end=self.on_slider_value_change)
+        value_slider_text = ft.Text("Opacity") 
+        slider_icon = ft.Icon(ft.icons.OPACITY)       
+        slider_row = ft.Container(ft.Row(controls=[slider_icon,value_slider_text,value_slider]))
         close_button = ft.IconButton(
             icon=ft.icons.CLOSE,on_click=lambda e: self.close_tab(e, tab),
             focus_color="RED",highlight_color="RED",
@@ -270,7 +286,7 @@ class ScribeTabs(Observer):
         if self.page.window_full_screen is False:
             tab_content = ft.Container(
                 content=ft.Container(
-                    content=ft.Column([tab_color_select_button]),padding=20
+                    content=ft.Column([tab_color_select_button,slider_row]),padding=20
                 )
             )
             self.page.update()
@@ -507,7 +523,7 @@ def main(page: ft.Page):
     page.window_full_screen = False
     page.window_min_height = 320
     page.window_min_height = 640 
-    page.window_opacity = 20
+    page.window_opacity = 1
     page.auto_scroll = True
     page.window_center()
     page.window_frameless = True
@@ -566,22 +582,22 @@ def main(page: ft.Page):
             ft.PopupMenuButton(
                 items=[
                     # ft.PopupMenuItem(text="Configuration",icon=ft.icons.SETTINGS,
-                    # on_click=on_edit_configuration_button_click),
+                        # on_click=on_edit_configuration_button_click),
                     # ft.PopupMenuItem(),  # divider
                     ft.PopupMenuItem(text="Preferences",icon=ft.icons.EDIT,
-                    on_click=on_edit_preferences_button_click),                    
+                        on_click=on_edit_preferences_button_click),                    
                     ft.PopupMenuItem(),  # divider                    
                     ft.PopupMenuItem(text="History", icon=ft.icons.FILE_OPEN, 
-                    on_click=lambda _: observer3.pick_files_dialog.pick_files(allow_multiple=False)),
+                        on_click=lambda _: observer3.pick_files_dialog.pick_files(allow_multiple=False)),
                     ft.PopupMenuItem(),  # divider
                     ft.PopupMenuItem(text="Close Application",icon=ft.icons.CLOSE_ROUNDED,
-                    on_click=on_close_window_button_click),
+                        on_click=on_close_window_button_click),
                 ]
             ),
         ],)
     
-    window = ft.Container(content=ft.Column(controls=[ft.Row([add_tab_button])]))
-    pagelet = ft.Pagelet(appbar=app_bar,content=tab_container,adaptive=True)
+    nav_bar = ft.NavigationBar(selected_index=observer1.current_color_index,)
+    pagelet = ft.Pagelet(appbar=app_bar,content=tab_container,navigation_bar=nav_bar,adaptive=True)
 
     page.add(pagelet,add_tab_button)
 
