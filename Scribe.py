@@ -477,6 +477,7 @@ class FileSelector(Observer):
         self.selected_files = ft.Text()
         self.pick_files_dialog = ft.FilePicker(on_result=self.pick_files_result)
         self.page.overlay.append(self.pick_files_dialog)
+        self.err = ErrorHandler.throw
 
     def update(self):
         self.page.update()
@@ -500,6 +501,7 @@ class FileSelector(Observer):
                     self.scribe_tabs.add_tab_with_content(cleaned_content)
         else:
             self.selected_files.value = "Cancelled!"
+            self.page.open(self.err(f"{self.selected_files.value}"))
         self.selected_files.update()
 
 class ColorSelector:
