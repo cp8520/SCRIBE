@@ -222,7 +222,7 @@ class ScribeTabs(Observer):
         self.input_fields.append(input_field)
         
         close_button = ft.IconButton(
-            icon=ft.icons.CLOSE, on_click=lambda e: self.close_scribe_tab(e, tab),
+            icon=ft.icons.CLOSE, on_click=lambda e: self.close_scribe_tab(e, tab,name_tab_field.value),
             focus_color="RED", highlight_color="RED",
             selected_icon_color="RED", scale=.5, hover_color="RED"
         )
@@ -342,9 +342,10 @@ class ScribeTabs(Observer):
         index = self.load
         self.generate_tab(index)
         
-    def close_scribe_tab(self, e, tab):
+    def close_scribe_tab(self, e, tab,tabName):
         tab_index = self.tabs_list.index(tab)
         input_index = self.input_fields[tab_index]
+        name = tabName
         time = self.time.plain_time()
         t = ft.Text(value=time).value
         if len(input_index.value)<=0:
@@ -355,9 +356,9 @@ class ScribeTabs(Observer):
                 self.page.update()
             except Exception as ex:
                 self.page.open(self.err(f"EXCEPTION @ remove empty tab: {ex}"))
-        elif len(input_index.value)>=1:
+        elif len(input_index.value)>=1 and tabName != "":
             try:
-                self.save(self,input_index.value)
+                self.save(self,input_index.value,tabName)
                 self.tabs_list.remove(tab)
                 self.input_fields.remove(input_index)
                 self.tabs_control.tabs = self.tabs_list
@@ -365,6 +366,8 @@ class ScribeTabs(Observer):
                 self.page.open(self.confirm_close(f"Tab data was saved to history!"))
             except Exception as ex:
                 self.page.open(self.err(f"EXCEPTION @ remove saved tab: {ex}"))
+        else:
+            self.page.open(self.err("Name the tab first."))
 
     def close_tab(self,e,tab):
         dummy_field = ft.TextField()
@@ -417,16 +420,17 @@ class ErrorHandler:
 class DataHandler(Observer):
     def __init__(self, page: ft.Page):
         self.page = page
-        self.time_gen = TimestampGenerator
     
     def update(self):
         self.page.update()
     
-    def save_text(self,text):
+    def save_text(self,text,tabName):
         t = text
-        timestamp = int(time.time()) 
+        timestamp = int(time.time())
+        name = tabName
+        if tabName == None: name = timestamp
         i = []
-        filename = f"tab_{timestamp}_"
+        filename = f"{name}"
         i.append(t)
         with open(f"{filename}.pkl","wb") as f:
             pickle.dump(i, f)
