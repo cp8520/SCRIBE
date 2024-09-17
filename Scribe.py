@@ -206,7 +206,7 @@ class ScribeTabs(Observer):
         t = TimestampGenerator(self.page).generate_timestamp
         name_tab_field = ft.TextField(
             hint_text=f"Scribe Tab",
-            width=100, border_width=0, content_padding=1
+            width=100, border_width=0, content_padding=1,color=ft.colors.WHITE
         )
         
         input_field = ft.TextField(
@@ -223,7 +223,7 @@ class ScribeTabs(Observer):
         
         close_button = ft.IconButton(
             icon=ft.icons.CLOSE, on_click=lambda e: self.close_scribe_tab(e, tab,name_tab_field.value),
-            focus_color="RED", highlight_color="RED",
+            focus_color="RED_100", highlight_color="RED",
             selected_icon_color="RED", scale=.5, hover_color="RED"
         )
 
@@ -270,7 +270,7 @@ class ScribeTabs(Observer):
         slider_row = ft.Container(ft.Row(controls=[slider_icon,value_slider_text,value_slider]))
         close_button = ft.IconButton(
             icon=ft.icons.CLOSE,on_click=lambda e: self.close_tab(e, tab),
-            focus_color="RED",highlight_color="RED",
+            focus_color="RED_100",highlight_color="RED",
             selected_icon_color="RED",scale=.5,hover_color="RED"
         )
         cs = ColorSelector
@@ -319,7 +319,7 @@ class ScribeTabs(Observer):
 
     def generate_config_tab(self, index):
         close_button = ft.IconButton(
-            icon=ft.icons.CLOSE,on_click=lambda e: self.close_tab(e, tab),focus_color="RED",highlight_color="RED",
+            icon=ft.icons.CLOSE,on_click=lambda e: self.close_tab(e, tab),focus_color="RED_100",highlight_color="RED",
             selected_icon_color="RED",scale=.5,hover_color="RED"
         )
         name_tab_field = ft.Text(
@@ -367,7 +367,15 @@ class ScribeTabs(Observer):
             except Exception as ex:
                 self.page.open(self.err(f"EXCEPTION @ remove saved tab: {ex}"))
         else:
-            self.page.open(self.err("Name the tab first."))
+            try:
+                self.save(self,input_index.value,time)
+                self.tabs_list.remove(tab)
+                self.input_fields.remove(input_index)
+                self.tabs_control.tabs = self.tabs_list
+                self.page.update()
+                self.page.open(self.confirm_close(f"Tab data was saved to history!"))
+            except Exception as ex:
+                self.page.open(self.err(f"EXCEPTION @ remove saved tab: {ex}"))
 
     def close_tab(self,e,tab):
         dummy_field = ft.TextField()
