@@ -447,7 +447,7 @@ class DataHandler(Observer):
         i = []
         filename = f"{name}"
         i.append(t)
-        with open(f"{filename}.pkl","wb") as f:
+        with open(f"{filename}","wb") as f:
             pickle.dump(i, f)
 
     def save_preferences(self,text):
