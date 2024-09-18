@@ -187,12 +187,12 @@ class ScribeTabs(Observer):
         else:
             self.page.open(self.err("Max amount of tabs reached!"))
 
-    def add_tab_with_content(self, content):
+    def add_tab_with_content(self, content,name):
         tc = self.tabs_control
         if len(tc.tabs) < 50:
             try:
                 new_index_position = len(self.tabs_list)
-                t = self.generate_tab(new_index_position, content)
+                t = self.generate_tab(new_index_position, content,name)
                 tc.tabs.append(t)
                 self.tabs_list = tc.tabs
                 self.page.update()
@@ -201,11 +201,11 @@ class ScribeTabs(Observer):
         else:
             self.page.open(self.err("Max amount of tabs reached!"))
 
-    def generate_tab(self, index, content=None):
+    def generate_tab(self, index, content=None,name=None):
         # Generate timestamp
         t = TimestampGenerator(self.page).generate_timestamp
         name_tab_field = ft.TextField(
-            hint_text=f"Scribe Tab",
+            hint_text=f"Scribe Tab",value=name if name else "",
             width=100, border_width=0, content_padding=1,color=ft.colors.WHITE
         )
         
@@ -254,9 +254,11 @@ class ScribeTabs(Observer):
                 self.page.update()
                 print(f"new index pos = {new_index_position}\nlength of tabs list = {len(self.tabs_list)}")
             except Exception as ex:
-                self.page.open(self.err(f"EXCEPTION: {ex}"))
+                # self.page.open(self.err(f"EXCEPTION: {ex}"))
+                pass
         else:
-            self.page.open(self.err("Max amount of tabs reached!"))
+            # self.page.open(self.err("Max amount of tabs reached!"))
+            pass
     def on_slider_value_change(self,e):
         newval = e.control.value / 100  # Slider returns values from 0 to 100, opacity needs to be between 0 and 1
         self.page.window_opacity = newval
@@ -313,9 +315,11 @@ class ScribeTabs(Observer):
                 self.tabs_list = tc.tabs
                 self.page.update()
             except Exception as ex:
-                self.page.open(self.err(f"EXCEPTION: {ex}"))
+                # self.page.open(self.err(f"EXCEPTION: {ex}"))
+                pass
         else:
-            self.page.open(self.err("Max amount of tabs reached!"))
+            # self.page.open(self.err("Max amount of tabs reached!"))
+            pass
 
     def generate_config_tab(self, index):
         close_button = ft.IconButton(
@@ -355,7 +359,8 @@ class ScribeTabs(Observer):
                 self.tabs_control.tabs = self.tabs_list
                 self.page.update()
             except Exception as ex:
-                self.page.open(self.err(f"EXCEPTION @ remove empty tab: {ex}"))
+                # self.page.open(self.err(f"EXCEPTION @ remove empty tab: {ex}"))
+                pass
         elif len(input_index.value)>=1 and tabName != "":
             try:
                 self.save(self,input_index.value,tabName)
@@ -363,9 +368,10 @@ class ScribeTabs(Observer):
                 self.input_fields.remove(input_index)
                 self.tabs_control.tabs = self.tabs_list
                 self.page.update()
-                self.page.open(self.confirm_close(f"Tab data was saved to history!"))
+                # self.page.open(self.confirm_close(f"Tab data was saved to history!"))
             except Exception as ex:
-                self.page.open(self.err(f"EXCEPTION @ remove saved tab: {ex}"))
+                # self.page.open(self.err(f"EXCEPTION @ remove saved tab: {ex}"))
+                pass
         else:
             try:
                 self.save(self,input_index.value,time)
@@ -373,9 +379,10 @@ class ScribeTabs(Observer):
                 self.input_fields.remove(input_index)
                 self.tabs_control.tabs = self.tabs_list
                 self.page.update()
-                self.page.open(self.confirm_close(f"Tab data was saved to history!"))
+                # self.page.open(self.confirm_close(f"Tab data was saved to history!"))
             except Exception as ex:
-                self.page.open(self.err(f"EXCEPTION @ remove saved tab: {ex}"))
+                # self.page.open(self.err(f"EXCEPTION @ remove saved tab: {ex}"))
+                pass
 
     def close_tab(self,e,tab):
         dummy_field = ft.TextField()
@@ -510,10 +517,11 @@ class FileSelector(Observer):
                 with open(file.path, "rb") as f:
                     content = pickle.load(f)
                     cleaned_content = self.clean_data(content)
-                    self.scribe_tabs.add_tab_with_content(cleaned_content)
+                    name = self.clean_data(f.name)
+                    self.scribe_tabs.add_tab_with_content(cleaned_content,name)
         else:
             self.selected_files.value = "Cancelled!"
-            self.page.open(self.err(f"{self.selected_files.value}"))
+            # self.page.open(self.err(f"{self.selected_files.value}"))
         self.selected_files.update()
 
 class ColorSelector:
@@ -543,7 +551,9 @@ def main(page: ft.Page):
     page.window_frameless = True
     page.window_title_bar_buttons_hidden = True
     page.window_title_bar_hidden = True
+
     subject = Subject()
+    
     data_handler = DataHandler(page)
     observer1 = ScribeTabs(page)
     observer2 = PageObserver(page)
