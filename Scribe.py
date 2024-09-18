@@ -518,7 +518,7 @@ class FileSelector(Observer):
                     content = pickle.load(f)
                     cleaned_content = self.clean_data(content)
                     name = self.clean_data(f.name)
-                    self.scribe_tabs.add_tab_with_content(cleaned_content,name)
+                    self.scribe_tabs.add_tab_with_content(cleaned_content,file.name)
         else:
             self.selected_files.value = "Cancelled!"
             # self.page.open(self.err(f"{self.selected_files.value}"))
