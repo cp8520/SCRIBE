@@ -117,7 +117,7 @@ class ScribeTabs(Observer):
             animation_duration=800,
             right=True
         )
-        self.color_list = ["RED","ORANGE","YELLOW","GREEN","BLUE","INDIGO","PURPLE","SURFACE_VARIANT"]
+        self.color_list = ["RED","YELLOW","GREEN","BLUE","INDIGO","PURPLE","SURFACE_VARIANT"]
         self.current_color_index = 0
         self.max_other_tabs = 0
 
