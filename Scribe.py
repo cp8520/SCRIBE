@@ -114,7 +114,7 @@ class ScribeTabs(Observer):
             overlay_color=f"{self.c}900",
             divider_color=f"{self.c}900",
             scrollable = True,
-            animation_duration=800,
+            animation_duration=1000,
             right=True
         )
         self.color_list = ["RED","YELLOW","GREEN","BLUE","INDIGO","PURPLE","SURFACE_VARIANT"]
