@@ -1,3 +1,4 @@
+
 import sys
 import flet as ft
 from zoneinfo import ZoneInfo
@@ -117,7 +118,7 @@ class ScribeTabs(Observer):
             animation_duration=1000,
             right=True
         )
-        self.color_list = ["RED","YELLOW","GREEN","BLUE","INDIGO","PURPLE","SURFACE_VARIANT"]
+        self.color_list = ["BLACK","RED","YELLOW","GREEN","BLUE","INDIGO","PURPLE","WHITE"]
         self.current_color_index = 0
         self.max_other_tabs = 0
 
@@ -206,7 +207,7 @@ class ScribeTabs(Observer):
         t = TimestampGenerator(self.page).generate_timestamp
         name_tab_field = ft.TextField(
             hint_text=f"Scribe Tab",value=name if name else "",
-            width=100, border_width=0, content_padding=1,color=ft.colors.WHITE
+            width=100, border_width=0, content_padding=1,color=self.tabs_control.indicator_color 
         )
         
         input_field = ft.TextField(
@@ -216,7 +217,7 @@ class ScribeTabs(Observer):
             content_padding=20, show_cursor=True,
             max_lines=20, dense=True, border_width=0, adaptive=True,
             value=content if content else "",  # Use content if provided
-            color=self.tabs_control.indicator_color,
+            color=self.tabs_control.indicator_color,on_blur=lambda e: self.save_tab_content_on_blur(e,tab,name_tab_field.value)
         )
 
         self.input_fields.append(input_field)
@@ -345,6 +346,35 @@ class ScribeTabs(Observer):
     def add_loaded_tab(self,e):
         index = self.load
         self.generate_tab(index)
+    
+    def save_tab_content_on_blur(self,e,tab,tabName):
+        tab_index = self.tabs_list.index(tab)
+        input_index = self.input_fields[tab_index]
+        name = tabName
+        time = self.time.plain_time()
+        t = ft.Text(value=time).value
+        if len(input_index.value)<=0:
+            try:
+                self.page.update()
+            except Exception as ex:
+                # self.page.open(self.err(f"EXCEPTION @ remove empty tab: {ex}"))
+                pass
+        elif len(input_index.value)>=1 and tabName != "":
+            try:
+                self.save(self,input_index.value,time)
+                self.page.update()
+                # self.page.open(self.confirm_close(f"Tab data was saved to history!"))
+            except Exception as ex:
+                # self.page.open(self.err(f"EXCEPTION @ remove saved tab: {ex}"))
+                pass
+        else:
+            try:
+                self.save(self,input_index.value,time)
+                self.page.update()
+                # self.page.open(self.confirm_close(f"Tab data was saved to history!"))
+            except Exception as ex:
+                # self.page.open(self.err(f"EXCEPTION @ remove saved tab: {ex}"))
+                pass
         
     def close_scribe_tab(self, e, tab,tabName):
         tab_index = self.tabs_list.index(tab)
