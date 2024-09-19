@@ -342,10 +342,7 @@ class ScribeTabs(Observer):
             content=ft.Container(ft.Column([ft.Column([tab_content])],auto_scroll=True,scroll=True,expand=True))
         )
         return tab
-    
-    def add_loaded_tab(self,e):
-        index = self.load
-        self.generate_tab(index)
+
     
     def save_tab_content_on_blur(self,e,tab,tabName):
         tab_index = self.tabs_list.index(tab)
