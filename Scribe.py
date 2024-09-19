@@ -1,110 +1,12 @@
-
-
-import sys
-import flet as ft
 from zoneinfo import ZoneInfo
 from datetime import datetime
-import requests
+from api_service import ApiService
+from error_handler import ErrorHandler
+from observer import Observer
+from subject import Subject
 import pickle
 import time
-
-class ApiService:
-    def __init__(self, base_url, username, password):
-        self.base_url = base_url
-        self.username = username
-        self.password = password
-        self.token = None
-
-    def signed_in_check(self,e,username=None,password=None):
-        u = username if username else "NA"
-        p = "not blank" if password else "NA"
-        print(f"Sign in attempted, username is {u} and password was {p}")
-        self.username = u
-        self.password = password
-        print(f"Attempting to do something with the data recieved\nusername saved: {self.username}\npassword saved: {self.password}")
-
-    def authenticate(self):
-        auth_url = ""  # Replace with your actual auth endpoint
-        payload = {
-            "username": self.username,
-            "password": self.password
-        }
-        
-        try:
-            response = requests.post(auth_url, json=payload)
-            if response.status_code == 200:
-                self.token = response.json().get('access_token')
-                print(f"Authentication successful! Token: {self.token}")
-            else:
-                print(f"Failed to authenticate: {response.status_code} {response.text}")
-        except Exception as ex:
-            print(f"An error occurred during authentication: {ex}")
-
-    def get_headers(self):
-        """Returns headers with the authentication token."""
-        if self.token:
-            return {
-                'Authorization': f'Bearer {self.token}',
-                'Content-Type': 'application/json'
-            }
-        else:
-            return {
-                'Content-Type': 'application/json'
-            }
-
-    def login(self,username, pinandyubikey):
-        hedr = self.get_geaders
-        Request = [            
-            "type",
-            "username",
-            "twofa"]
-        Request.Type = "Login"
-        Request.Username = username
-        Request.Twofa = pinandyubikey
-        requestByte = json.Marshal(Request)
-        r, err = Client.Post(AuthSVCEndPoint, bytes.NewReader(requestByte), hedr)
-        if err != nil:
-            rtrn.Message == err.Error()
-            return
-        Body.Close()
-        err = json.NewDecoder(Body).Decode(rtrn)
-        return
-
-    def make_authorized_request(self, endpoint):
-        """Example of making a request with an authenticated token."""
-        headers = self.get_headers()
-        url = f"{self.base_url}{endpoint}"
-        try:
-            response = requests.get(url, headers=headers)
-            if response.status_code == 200:
-                return response.json()
-            else:
-                print(f"Failed to retrieve data: {response.status_code} {response.text}")
-                return None
-        except Exception as ex:
-            print(f"An error occurred during the request: {ex}")
-            return None
-
-class Observer:
-    def update(self, message):
-        try:
-            raise NotImplementedError("Subclass must implement abstract method")
-        except Exception as ex:
-            print(f"ERROR: {ex}")
-
-class Subject:
-    def __init__(self):
-        self._observers = []
-
-    def add_observer(self, observer):
-        self._observers.append(observer)
-
-    def remove_observer(self, observer):
-        self._observers.remove(observer)
-
-    def notify_observers(self,function):
-        for observer in self._observers:
-            observer.update()
+import flet as ft
 
 class PageObserver(Observer):
     def __init__(self, page: ft.Page):
@@ -120,7 +22,7 @@ class PageObserver(Observer):
 class ScribeTabs(Observer):
     def __init__(self, page: ft.Page):
         self.page = page
-        self.api_check_login_status = ApiService.signed_in_check
+        self.api = ApiService("username","password")
         # self.api_service = ApiService("https://api.example.com")        
         self.err = ErrorHandler.throw
         self.confirm_close = ErrorHandler.safety_net
@@ -395,34 +297,65 @@ class ScribeTabs(Observer):
             # self.page.open(self.err("Max amount of tabs reached!"))
             pass
 
-    def generate_profile_tab(self,index):
-        username=ft.TextField(hint_text="Username",expand=False)
-        password=ft.TextField(hint_text="Password",password=True,can_reveal_password=True,on_submit=lambda e: self.api_check_login_status(self,e,username.value,password.value))
+    def generate_profile_tab(self, index):
+        username = ft.TextField(hint_text="Username", expand=False)
+        password = ft.TextField(
+            hint_text="Password",
+            password=True,
+            can_reveal_password=True,
+            on_submit=lambda e: self.authenticate_and_update(e, username.value, password.value)  # Call the new method here
+        )
+        
         close_button = ft.IconButton(
-            icon=ft.icons.CLOSE,on_click=lambda e: self.close_tab(e, tab),
-            focus_color="RED_100",highlight_color="RED",
-            selected_icon_color="RED",scale=.5,hover_color="RED"
+            icon=ft.icons.CLOSE,
+            on_click=lambda e: self.close_tab(e, tab),
+            focus_color="RED_100",
+            highlight_color="RED",
+            selected_icon_color="RED",
+            scale=.5,
+            hover_color="RED"
         )
-        name_tab_field = ft.Text(
-            value=f"Account",
+        
+        name_tab_field = ft.Text(value="Account")
+        tab_icon = ft.Icon(ft.icons.PERSON, scale=.75)
+        
+        tab_content = ft.Container(
+            content=ft.Container(
+                content=ft.Column([username, password])
+            )
         )
-        tab_icon = ft.Icon(ft.icons.ABC,scale=.75)
-        if self.page.window_full_screen is False:
-                tab_content = ft.Container(
-                    content=ft.Container(
-                        content=ft.Column([username,password                      
-                            ])))
-        else:
-                tab_content = ft.Container(
-                    content=ft.Container(
-                        content=ft.Column([username,password                        
-                            ]))) 
+        
         tab = ft.Tab(
-            tab_content=ft.Row([tab_icon,name_tab_field,close_button]),
-            content=ft.Container(ft.Column([ft.Column([tab_content])],
-            auto_scroll=True,scroll=True,expand=True))
+            tab_content=ft.Row([tab_icon, name_tab_field, close_button]),
+            content=ft.Container(ft.Column([tab_content], auto_scroll=True, scroll=True, expand=True))
         )
         return tab
+
+    def authenticate_and_update(self, e, username, password):
+        if username and password:
+            try:
+                self.api.signed_in_check(e, username, password)  # Check the sign-in
+                user_details = self.api.make_authorized_request(username)  # Fetch user details
+                self.page.update()
+            except Exception as ex:
+                self.page.open(self.err("Authentication failed. Please check your credentials."))
+                self.page.open(self.err(f"An error occurred: {ex}"))
+
+    def update_ui_with_profile_details(self, user_details, tab):
+        # Assuming user_details is a dictionary with relevant profile information
+        profile_info = f"Username: {user_details.get('username')}\n" \
+                    f"Email: {user_details.get('email')}\n" \
+                    f"Other Info: {user_details.get('other_info')}"  # Customize as needed
+
+        # Create a Text widget to display the profile info
+        profile_display = ft.Text(value=profile_info)
+
+        # Update the content of the passed tab
+        tab.content = ft.Container(
+            ft.Column([profile_display], auto_scroll=True, scroll=True, expand=True)
+        )
+
+        self.page.update(tab)  # Update the page to reflect changes
 
     def save_tab_content_on_blur(self,e,tab,tabName):
         tab_index = self.tabs_list.index(tab)
@@ -517,28 +450,6 @@ class TimestampGenerator(Observer):
     def update(self):
         self.page.update()
 
-class ErrorHandler:
-    def __init__(self, page: ft.Page):
-        self.page = page
-    
-    def update(self):
-        self.page.update()
-    
-    def throw(message):        
-        error = ft.Text(message,text_align=ft.MainAxisAlignment.CENTER,scale=.75)
-        i = ft.Icon(ft.icons.WARNING)
-        row = ft.Row(controls=[i,error],spacing=30,alignment=ft.MainAxisAlignment.SPACE_EVENLY,vertical_alignment=ft.MainAxisAlignment.CENTER,wrap=True)
-        dlg = ft.AlertDialog(title=row,content_padding=20,actions=[],modal=False,)
-        return dlg
-    
-    def safety_net(message):
-        error = ft.Text(message,text_align=ft.MainAxisAlignment.CENTER,scale=.75)
-        i = ft.Icon(ft.icons.WARNING)
-        xmark = ft.IconButton(icon=ft.icons.CLOSE,on_click=lambda self: self.page.close(dlg_modal))
-        row = ft.Row(controls=[i,error],spacing=30,alignment=ft.MainAxisAlignment.SPACE_EVENLY,vertical_alignment=ft.MainAxisAlignment.CENTER,wrap=True)
-        dlg_modal = ft.AlertDialog(title=row,content_padding=20,actions=[xmark],modal=True,on_dismiss=lambda self: self.page.close(dlg_modal),actions_alignment=ft.MainAxisAlignment.CENTER)
-        return dlg_modal
-    
 class DataHandler(Observer):
     def __init__(self, page: ft.Page):
         self.page = page
@@ -715,7 +626,7 @@ def main(page: ft.Page):
         actions=[
             ft.PopupMenuButton(
                 items=[
-                    ft.PopupMenuItem(text="Sign In",icon=ft.icons.ABC,
+                    ft.PopupMenuItem(text="Sign In",icon=ft.icons.PERSON,
                         on_click=on_add_relay_tool_button_click),
                     ft.PopupMenuItem(),  # divider
                     ft.PopupMenuItem(text="Preferences",icon=ft.icons.EDIT,
