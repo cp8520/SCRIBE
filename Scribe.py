@@ -1,4 +1,5 @@
 
+
 import sys
 import flet as ft
 from zoneinfo import ZoneInfo
@@ -14,8 +15,16 @@ class ApiService:
         self.password = password
         self.token = None
 
+    def signed_in_check(self,e,username=None,password=None):
+        u = username if username else "NA"
+        p = "not blank" if password else "NA"
+        print(f"Sign in attempted, username is {u} and password was {p}")
+        self.username = u
+        self.password = password
+        print(f"Attempting to do something with the data recieved\nusername saved: {self.username}\npassword saved: {self.password}")
+
     def authenticate(self):
-        auth_url = f"{self.base_url}/auth/token"  # Replace with your actual auth endpoint
+        auth_url = ""  # Replace with your actual auth endpoint
         payload = {
             "username": self.username,
             "password": self.password
@@ -42,6 +51,24 @@ class ApiService:
             return {
                 'Content-Type': 'application/json'
             }
+
+    def login(self,username, pinandyubikey):
+        hedr = self.get_geaders
+        Request = [            
+            "type",
+            "username",
+            "twofa"]
+        Request.Type = "Login"
+        Request.Username = username
+        Request.Twofa = pinandyubikey
+        requestByte = json.Marshal(Request)
+        r, err = Client.Post(AuthSVCEndPoint, bytes.NewReader(requestByte), hedr)
+        if err != nil:
+            rtrn.Message == err.Error()
+            return
+        Body.Close()
+        err = json.NewDecoder(Body).Decode(rtrn)
+        return
 
     def make_authorized_request(self, endpoint):
         """Example of making a request with an authenticated token."""
@@ -93,6 +120,7 @@ class PageObserver(Observer):
 class ScribeTabs(Observer):
     def __init__(self, page: ft.Page):
         self.page = page
+        self.api_check_login_status = ApiService.signed_in_check
         # self.api_service = ApiService("https://api.example.com")        
         self.err = ErrorHandler.throw
         self.confirm_close = ErrorHandler.safety_net
@@ -324,7 +352,8 @@ class ScribeTabs(Observer):
 
     def generate_config_tab(self, index):
         close_button = ft.IconButton(
-            icon=ft.icons.CLOSE,on_click=lambda e: self.close_tab(e, tab),focus_color="RED_100",highlight_color="RED",
+            icon=ft.icons.CLOSE,on_click=lambda e: self.close_tab(e, tab),
+            focus_color="RED_100",highlight_color="RED",
             selected_icon_color="RED",scale=.5,hover_color="RED"
         )
         name_tab_field = ft.Text(
@@ -332,18 +361,69 @@ class ScribeTabs(Observer):
         )
         tab_icon = ft.Icon(ft.icons.SETTINGS,scale=.75)
         if self.page.window_full_screen is False:
-                tab_content = ft.Container(content=ft.Container(content=ft.Radio("Auto Scroll",value=True,
-                toggleable=True),padding=20))
+                tab_content = ft.Container(
+                    content=ft.Container(
+                        content=ft.Radio("Auto Scroll",value=True,
+                        toggleable=True),padding=20))
         else:
-                tab_content = ft.Container(content=ft.Container(content=ft.Radio("Auto Scroll",value=False,
+                tab_content = ft.Container(
+                    content=ft.Container(
+                        content=ft.Radio("Auto Scroll",value=False,
                 toggleable=True),padding=20))
         tab = ft.Tab(
             tab_content=ft.Row([tab_icon,name_tab_field,close_button]),
-            content=ft.Container(ft.Column([ft.Column([tab_content])],auto_scroll=True,scroll=True,expand=True))
+            content=ft.Container(ft.Column([ft.Column([tab_content])],
+            auto_scroll=True,scroll=True,expand=True))
         )
         return tab
 
-    
+    def add_profile_tab(self, e):
+        tc = self.tabs_control
+        dummy_field = ft.TextField()
+        if self.max_other_tabs <= 0 and len(tc.tabs) < 50:
+            try:
+                new_index_position = len(self.tabs_list)
+                t = self.generate_profile_tab(new_index_position)
+                tc.tabs.append(t)
+                self.input_fields.append(dummy_field)
+                self.tabs_list = tc.tabs
+                self.page.update()
+            except Exception as ex:
+                # self.page.open(self.err(f"EXCEPTION: {ex}"))
+                pass
+        else:
+            # self.page.open(self.err("Max amount of tabs reached!"))
+            pass
+
+    def generate_profile_tab(self,index):
+        username=ft.TextField(hint_text="Username",expand=False)
+        password=ft.TextField(hint_text="Password",password=True,can_reveal_password=True,on_submit=lambda e: self.api_check_login_status(self,e,username.value,password.value))
+        close_button = ft.IconButton(
+            icon=ft.icons.CLOSE,on_click=lambda e: self.close_tab(e, tab),
+            focus_color="RED_100",highlight_color="RED",
+            selected_icon_color="RED",scale=.5,hover_color="RED"
+        )
+        name_tab_field = ft.Text(
+            value=f"Account",
+        )
+        tab_icon = ft.Icon(ft.icons.ABC,scale=.75)
+        if self.page.window_full_screen is False:
+                tab_content = ft.Container(
+                    content=ft.Container(
+                        content=ft.Column([username,password                      
+                            ])))
+        else:
+                tab_content = ft.Container(
+                    content=ft.Container(
+                        content=ft.Column([username,password                        
+                            ]))) 
+        tab = ft.Tab(
+            tab_content=ft.Row([tab_icon,name_tab_field,close_button]),
+            content=ft.Container(ft.Column([ft.Column([tab_content])],
+            auto_scroll=True,scroll=True,expand=True))
+        )
+        return tab
+
     def save_tab_content_on_blur(self,e,tab,tabName):
         tab_index = self.tabs_list.index(tab)
         input_index = self.input_fields[tab_index]
@@ -607,6 +687,9 @@ def main(page: ft.Page):
     def on_edit_configuration_button_click(e):
         subject.notify_observers(observer1.add_config_tab(e))
 
+    def on_add_relay_tool_button_click(e):
+        subject.notify_observers(observer1.add_profile_tab(e))
+
     add_tab_button = ft.FloatingActionButton(
         icon=ft.icons.NOTE_ADD,
         bgcolor=ft.colors.SURFACE_VARIANT,
@@ -632,9 +715,9 @@ def main(page: ft.Page):
         actions=[
             ft.PopupMenuButton(
                 items=[
-                    # ft.PopupMenuItem(text="Configuration",icon=ft.icons.SETTINGS,
-                        # on_click=on_edit_configuration_button_click),
-                    # ft.PopupMenuItem(),  # divider
+                    ft.PopupMenuItem(text="Sign In",icon=ft.icons.ABC,
+                        on_click=on_add_relay_tool_button_click),
+                    ft.PopupMenuItem(),  # divider
                     ft.PopupMenuItem(text="Preferences",icon=ft.icons.EDIT,
                         on_click=on_edit_preferences_button_click),                    
                     ft.PopupMenuItem(),  # divider                    
