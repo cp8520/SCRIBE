@@ -305,7 +305,15 @@ class ScribeTabs(Observer):
             can_reveal_password=True,
             on_submit=lambda e: self.authenticate_and_update(e, username.value, password.value)  # Call the new method here
         )
-        
+        token = self.api.get_token
+        logout_button = ft.IconButton(
+            icon=ft.icons.LOGOUT,
+            focus_color="RED_100",
+            highlight_color="RED",
+            selected_icon_color="RED_100",
+            scale=.5,
+            hover_color="RED"
+        )
         close_button = ft.IconButton(
             icon=ft.icons.CLOSE,
             on_click=lambda e: self.close_tab(e, tab),
@@ -319,15 +327,14 @@ class ScribeTabs(Observer):
         name_tab_field = ft.Text(value="Account")
         tab_icon = ft.Icon(ft.icons.PERSON, scale=.75)
         
-        tab_content = ft.Container(
-            content=ft.Container(
-                content=ft.Column([username, password])
-            )
+        tab_content if token ft.Container(content=ft.Container(content=ft.Column([logout_button]))) else ft.Container(content=ft.Container(content=ft.Column([username, password])
         )
+
+        
         
         tab = ft.Tab(
             tab_content=ft.Row([tab_icon, name_tab_field, close_button]),
-            content=ft.Container(ft.Column([tab_content], auto_scroll=True, scroll=True, expand=True))
+            content=ft.Container(ft.Column([], auto_scroll=True, scroll=True, expand=True))
         )
         return tab
 
@@ -626,16 +633,16 @@ def main(page: ft.Page):
         actions=[
             ft.PopupMenuButton(
                 items=[
-                    ft.PopupMenuItem(text="Sign In",icon=ft.icons.PERSON,
+                    ft.PopupMenuItem(text="Account",icon=ft.icons.PERSON,padding=20,
                         on_click=on_add_relay_tool_button_click),
                     ft.PopupMenuItem(),  # divider
-                    ft.PopupMenuItem(text="Preferences",icon=ft.icons.EDIT,
+                    ft.PopupMenuItem(text="Preferences",icon=ft.icons.EDIT,padding=20,
                         on_click=on_edit_preferences_button_click),                    
                     ft.PopupMenuItem(),  # divider                    
-                    ft.PopupMenuItem(text="History", icon=ft.icons.FILE_OPEN, 
+                    ft.PopupMenuItem(text="History", icon=ft.icons.FILE_OPEN,padding=20, 
                         on_click=lambda _: observer3.pick_files_dialog.pick_files(allow_multiple=False)),
                     ft.PopupMenuItem(),  # divider
-                    ft.PopupMenuItem(text="Close Application",icon=ft.icons.CLOSE_ROUNDED,
+                    ft.PopupMenuItem(text="Close Application",icon=ft.icons.CLOSE_ROUNDED,padding=20,
                         on_click=on_close_window_button_click),
                 ]
             ),

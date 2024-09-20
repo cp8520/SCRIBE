@@ -10,6 +10,15 @@ class ApiService:
         self.key = Fernet.generate_key()  # Generate a new key for encryption
         self.cipher = Fernet(self.key)     # Create a cipher object
 
+    def get_username(self):
+        username = self.username
+        return username
+    
+    def get_token(self):
+        t = self.token
+        return t
+            
+
     def update_endpoint(api_service, new_endpoint):
         api_service.authsvcendpoint = new_endpoint
         print(f"Endpoint updated to: {api_service.authsvcendpoint}")
