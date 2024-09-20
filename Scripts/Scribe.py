@@ -23,7 +23,6 @@ class ScribeTabs(Observer):
     def __init__(self, page: ft.Page):
         self.page = page
         self.api = ApiService("username","password")
-        # self.api_service = ApiService("https://api.example.com")        
         self.err = ErrorHandler.throw
         self.confirm_close = ErrorHandler.safety_net
         self.save = DataHandler.save_text
@@ -45,10 +44,10 @@ class ScribeTabs(Observer):
             overlay_color=f"{self.c}900",
             divider_color=f"{self.c}900",
             scrollable = True,
-            animation_duration=1000,
+            animation_duration=1024,
             right=True
         )
-        self.color_list = ["BLACK","RED","YELLOW","GREEN","BLUE","INDIGO","PURPLE","WHITE"]
+        self.color_list = ["BLACK","RED","YELLOW","GREEN","BLUE","INDIGO","PURPLE","WHITE","BLACK100"]
         self.current_color_index = 0
         self.max_other_tabs = 0
 
