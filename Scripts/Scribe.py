@@ -326,15 +326,15 @@ class ScribeTabs(Observer):
         
         name_tab_field = ft.Text(value="Account")
         tab_icon = ft.Icon(ft.icons.PERSON, scale=.75)
-        
-        tab_content if token ft.Container(content=ft.Container(content=ft.Column([logout_button]))) else ft.Container(content=ft.Container(content=ft.Column([username, password])
-        )
 
-        
-        
+        # if token != None:
+        #     tab_content = ft.Container(content=ft.Container(content=ft.Column([logout_button])))
+        # else: 
+        tab_content = ft.Container(content=ft.Container(content=ft.Column([username, password])))
+
         tab = ft.Tab(
             tab_content=ft.Row([tab_icon, name_tab_field, close_button]),
-            content=ft.Container(ft.Column([], auto_scroll=True, scroll=True, expand=True))
+            content=ft.Container(ft.Column([tab_content], auto_scroll=True, scroll=True, expand=True))
         )
         return tab
 
