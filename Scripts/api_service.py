@@ -6,9 +6,9 @@ class ApiService:
         self.username = username
         self.password = password
         self.token = None
-        self.authsvcendpoint = "https://reqres.in/api/login"  # Reqres endpoint
-        self.key = Fernet.generate_key()  # Generate a new key for encryption
-        self.cipher = Fernet(self.key)     # Create a cipher object
+        self.authsvcendpoint = "https://reqres.in/api/login"  
+        self.key = Fernet.generate_key()  
+        self.cipher = Fernet(self.key)     
 
     def get_username(self):
         username = self.username
@@ -29,9 +29,9 @@ class ApiService:
 
         if self.token:
             print(f"Attempting to do something with the data received\nusername saved: {self.username}\npassword saved: {self.password}")
-            user_email = self.username  # Use the saved username as email
+            user_email = self.username  
             user_details = self.make_authorized_request(email=user_email)
-            # Update your UI with user_details here if applicable
+            
         else:        
             print(f"Sign in attempted, username is {u} and password was {p}")
             self.username = u
@@ -48,7 +48,7 @@ class ApiService:
             response = requests.post(self.authsvcendpoint, json=payload)
             if response.status_code == 200:
                 token = response.json().get('token')
-                self.token = self.cipher.encrypt(token.encode()).decode()  # Encrypt the token
+                self.token = self.cipher.encrypt(token.encode()).decode()  
                 print(f"Authentication successful! Token (encrypted): {self.token}")
                 self.get_headers()
             else:
@@ -58,14 +58,14 @@ class ApiService:
 
     def get_decrypted_token(self):
         if self.token:
-            return self.cipher.decrypt(self.token.encode()).decode()  # Decrypt the token
+            return self.cipher.decrypt(self.token.encode()).decode()  
         return None
 
     def get_headers(self):
         """Returns headers with the authentication token."""
         token = self.get_decrypted_token()
         if token:
-            # print(f'Bearer decrypted {token}')
+            
             return {
                 'Authorization': f'Bearer {token}',
                 'Content-Type': 'application/json'
@@ -83,9 +83,8 @@ class ApiService:
         try:
             response = requests.get(url, headers=headers)
             if response.status_code == 200:
-                data = response.json().get('data', [])  # Get the user data list
+                data = response.json().get('data', [])  
                 if email:
-                    # Filter the users by email
                     user = next((user for user in data if user['email'] == email), None)
                     if user:
                         user_details = (
