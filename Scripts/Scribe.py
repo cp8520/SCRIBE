@@ -294,7 +294,8 @@ class ScribeTabs(Observer):
                 bgcolor=ft.colors.BLUE_400,
                 expanded=False,
                 can_tap_header = True,
-                )
+                ),
+                # ft.IconButton(icon=ft.icons.CLOSE,on_click=self.handle_delete)
             ]
         )
 
