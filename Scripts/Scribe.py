@@ -289,8 +289,8 @@ class ScribeTabs(Observer):
             on_change=self.handle_change,
             controls=[
                 ft.ExpansionPanel(
-                    header = ft.Text("INC number"),
-                    content = ft.Text("Body from incident here"),
+                    header = ft.Text("get INC number"),
+                    content = ft.Text("Get Body from incident here"),
                 bgcolor=ft.colors.BLUE_400,
                 expanded=False,
                 can_tap_header = True,
