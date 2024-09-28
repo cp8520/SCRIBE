@@ -49,7 +49,7 @@ class ScribeTabs(Observer):
         )
         self.color_list = ["BLACK","RED","YELLOW","GREEN","BLUE","INDIGO","PURPLE","WHITE","BLACK100"]
         self.current_color_index = 0
-        self.max_other_tabs = 0
+        self.count_of_other_tabs = 0
 
 
     def update(self):
@@ -159,11 +159,11 @@ class ScribeTabs(Observer):
 
         tab_icon = ft.Icon(ft.icons.TAB, scale=.75)
         
-        tab_content = ft.Container(content=input_field, padding=20)
+        tabcontent = ft.Container(content=input_field, padding=20)
         tab = ft.Tab(
             tab_content=ft.Row(controls=[tab_icon, name_tab_field, close_button]),
             content=ft.Container(
-                ft.ResponsiveRow([ft.Column([tab_content])], rtl=False, 
+                ft.ResponsiveRow([ft.Column([tabcontent])], rtl=False, 
                 alignment=ft.MainAxisAlignment.SPACE_EVENLY, expand=True, run_spacing=1)
             )
         )
@@ -173,9 +173,9 @@ class ScribeTabs(Observer):
     def add_prefs_tab(self, e):
         tc = self.tabs_control
         dummy_field = ft.TextField()
-        if self.max_other_tabs <= 0 and len(tc.tabs) < 50:
+        if self.count_of_other_tabs <= 0 and len(tc.tabs) < 50:
             try:
-                self.max_other_tabs+=1
+                self.count_of_other_tabs+=1
                 new_index_position = len(self.tabs_list)
                 t = self.generate_prefs_tab(new_index_position)
                 tc.tabs.append(t)
@@ -201,7 +201,7 @@ class ScribeTabs(Observer):
         slider_icon = ft.Icon(ft.icons.OPACITY)       
         slider_row = ft.Container(ft.Row(controls=[slider_icon,value_slider_text,value_slider]))
         close_button = ft.IconButton(
-            icon=ft.icons.CLOSE,on_click=lambda e: self.close_tab(e, tab),
+            icon=ft.icons.CLOSE,on_click=lambda e: (self.close_tab(e, tab),self.count_of_other_tabs==0),
             focus_color="RED_100",highlight_color="RED",
             selected_icon_color="RED",scale=.5,hover_color="RED"
         )
@@ -233,10 +233,99 @@ class ScribeTabs(Observer):
         )
         return tab
 
+
+    def add_relay_tab(self, e):
+        tc = self.tabs_control
+        dummy_field = ft.TextField()        
+        if self.count_of_other_tabs <= 0 and len(tc.tabs) < 50:
+            try:
+                self.count_of_other_tabs+=1
+                new_index_position = len(self.tabs_list)
+                t = self.generate_relay_tab(new_index_position)
+                tc.tabs.append(t)
+                self.input_fields.append(dummy_field)
+                self.tabs_list = tc.tabs
+                self.page.update()
+            except Exception as ex:
+                print(f"EXCEPTION: {ex}")
+                pass
+        else:
+            print("Max amount of tabs reached!")
+            pass
+    def add_task(self,e,taskv,task,v,panel):
+        panel.content = task
+        if task != "":
+            taskv.content.controls.append(ft.Container(ft.Column(controls=[
+                panel,
+                
+                ],scroll=True)))
+            task = ""
+        return task
+    def handle_change(self,e: ft.ControlEvent):
+        print(f"change on panel with index {e.data}")
+
+    def handle_delete(self, e: ft.ControlEvent):
+        panel.controls.remove(e.control.data)
+        page.update()
+
+    def generate_relay_tab(self, index):
+        new_add_task = self.add_task
+        handle_c = self.handle_change
+        handle_d = self.handle_delete
+        close_button = ft.IconButton(
+            icon=ft.icons.CLOSE,on_click=lambda e: (self.close_tab(e, tab),self.count_of_other_tabs==0),
+            focus_color="RED_100",highlight_color="RED",
+            selected_icon_color="RED",scale=.5,hover_color="RED"
+        )      
+        email_button = ft.IconButton(icon=ft.icons.EMAIL,tooltip = "Send Selected to Relay")
+        tab_icon = ft.Icon(ft.icons.ABC)
+        name_tab_field = ft.Text(value=f"Incident Journal",)
+        tasks_view = ft.Container(ft.Column(scroll="AUTO",auto_scroll=True))        
+        new_task = ft.TextField(hint_text="INCIDENT NUMBER",on_submit=lambda e: (new_add_task(e,tasks_view,new_task.value,view,panel),view.update()))         
+        panel = ft.ExpansionPanelList(
+            expand_icon_color=ft.colors.AMBER,
+            elevation=8,
+            divider_color=ft.colors.AMBER,
+            on_change=self.handle_change,
+            controls=[
+                ft.ExpansionPanel(
+                    header = ft.Text("INC number"),
+                    content = ft.Text("Body from incident here"),
+                bgcolor=ft.colors.BLUE_400,
+                expanded=False,
+                can_tap_header = True,
+                )
+            ]
+        )
+
+       
+        view=ft.Container(ft.ResponsiveRow([ft.Column(
+            width=800,
+            controls=[
+                ft.Row(
+                    controls=[
+                        new_task,
+                        ft.FloatingActionButton(icon=ft.icons.ADD, on_click=lambda e: (new_add_task(e,tasks_view,new_task.value,view,panel),view.update())),
+                        email_button,
+                    ],
+                ),
+                tasks_view,
+            ],
+        )     ])  ) 
+
+        tab = ft.Tab(
+            tab_content=ft.Row([tab_icon,name_tab_field,close_button]),
+            content=ft.Container(ft.Column([ft.Column([view])],
+            auto_scroll=True,scroll="AUTO",expand=True))
+        )        
+        view.horizontal_alignment = ft.CrossAxisAlignment.CENTER
+
+        return tab
+
     def add_config_tab(self, e):
         tc = self.tabs_control
         dummy_field = ft.TextField()
-        if self.max_other_tabs <= 0 and len(tc.tabs) < 50:
+        if self.count_of_other_tabs <= 0 and len(tc.tabs) < 50:
             try:
                 new_index_position = len(self.tabs_list)
                 t = self.generate_config_tab(new_index_position)
@@ -253,7 +342,7 @@ class ScribeTabs(Observer):
 
     def generate_config_tab(self, index):
         close_button = ft.IconButton(
-            icon=ft.icons.CLOSE,on_click=lambda e: self.close_tab(e, tab),
+            icon=ft.icons.CLOSE,on_click=lambda e: (self.close_tab(e, tab),self.count_of_other_tabs==0),
             focus_color="RED_100",highlight_color="RED",
             selected_icon_color="RED",scale=.5,hover_color="RED"
         )
@@ -281,8 +370,9 @@ class ScribeTabs(Observer):
     def add_profile_tab(self, e):
         tc = self.tabs_control
         dummy_field = ft.TextField()
-        if self.max_other_tabs <= 0 and len(tc.tabs) < 50:
+        if self.count_of_other_tabs <= 0 and len(tc.tabs) < 50:
             try:
+                self.count_of_other_tabs+=1
                 new_index_position = len(self.tabs_list)
                 t = self.generate_profile_tab(new_index_position)
                 tc.tabs.append(t)
@@ -315,7 +405,7 @@ class ScribeTabs(Observer):
         )
         close_button = ft.IconButton(
             icon=ft.icons.CLOSE,
-            on_click=lambda e: self.close_tab(e, tab),
+            on_click=lambda e: (self.close_tab(e, tab),self.count_of_other_tabs==0),
             focus_color="RED_100",
             highlight_color="RED",
             selected_icon_color="RED",
@@ -432,7 +522,7 @@ class ScribeTabs(Observer):
 
     def close_tab(self,e,tab):
         dummy_field = ft.TextField()
-        self.max_other_tabs-=1
+        self.count_of_other_tabs-=1
         self.save_prefs(self,self.tabs_control.indicator_color)
         self.tabs_list.remove(tab)
         self.input_fields.pop()
@@ -605,6 +695,9 @@ def main(page: ft.Page):
         subject.notify_observers(observer1.add_config_tab(e))
 
     def on_add_relay_tool_button_click(e):
+        subject.notify_observers(observer1.add_relay_tab(e))
+
+    def on_add_profile_button_click(e):
         subject.notify_observers(observer1.add_profile_tab(e))
 
     add_tab_button = ft.FloatingActionButton(
@@ -624,7 +717,7 @@ def main(page: ft.Page):
         leading_width=40,
         title=ft.WindowDragArea(
             ft.Container(
-                ft.Text("SCRIBE"),
+                ft.Text("Knight Scribe"),
                 padding=20,scale=1.5
                 )),title_text_style=ft.TextStyle(italic=True),
         center_title=True,
@@ -633,6 +726,9 @@ def main(page: ft.Page):
             ft.PopupMenuButton(
                 items=[
                     ft.PopupMenuItem(text="Account",icon=ft.icons.PERSON,padding=20,
+                        on_click=on_add_profile_button_click),
+                    ft.PopupMenuItem(),  # divider
+                    ft.PopupMenuItem(text="Incident Management Journal",icon=ft.icons.LIST,padding=20,
                         on_click=on_add_relay_tool_button_click),
                     ft.PopupMenuItem(),  # divider
                     ft.PopupMenuItem(text="Preferences",icon=ft.icons.EDIT,padding=20,
