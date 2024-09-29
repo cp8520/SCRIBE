@@ -252,76 +252,114 @@ class ScribeTabs(Observer):
         else:
             print("Max amount of tabs reached!")
             pass
-    def add_task(self,e,taskv,task,v,panel):
-        panel.content = task
-        if task != "":
-            taskv.content.controls.append(ft.Container(ft.Column(controls=[
-                panel,
-                
-                ],scroll=True)))
-            task = ""
-        return task
-    def handle_change(self,e: ft.ControlEvent):
-        print(f"change on panel with index {e.data}")
 
-    def handle_delete(self, e: ft.ControlEvent):
-        panel.controls.remove(e.control.data)
-        page.update()
+    def add_task(self, e, v, task_list, task_input):
+        task_name = task_input.value.strip()  # Get the text from the input field
+        if task_name == "":
+            return  # Don't add empty tasks
 
-    def generate_relay_tab(self, index):
-        new_add_task = self.add_task
-        handle_c = self.handle_change
-        handle_d = self.handle_delete
-        close_button = ft.IconButton(
-            icon=ft.icons.CLOSE,on_click=lambda e: (self.close_tab(e, tab),self.count_of_other_tabs==0),
-            focus_color="RED_100",highlight_color="RED",
-            selected_icon_color="RED",scale=.5,hover_color="RED"
-        )      
-        email_button = ft.IconButton(icon=ft.icons.EMAIL,tooltip = "Send Selected to Relay")
-        tab_icon = ft.Icon(ft.icons.ABC)
-        name_tab_field = ft.Text(value=f"Incident Journal",)
-        tasks_view = ft.Container(ft.Column(scroll="AUTO",auto_scroll=True))        
-        new_task = ft.TextField(hint_text="INCIDENT NUMBER",on_submit=lambda e: (new_add_task(e,tasks_view,new_task.value,view,panel),view.update()))         
-        panel = ft.ExpansionPanelList(
-            expand_icon_color=ft.colors.AMBER,
-            elevation=8,
-            divider_color=ft.colors.AMBER,
-            on_change=self.handle_change,
-            controls=[
-                ft.ExpansionPanel(
-                    header = ft.Text("get INC number"),
-                    content = ft.Text("Get Body from incident here"),
-                bgcolor=ft.colors.BLUE_400,
-                expanded=False,
-                can_tap_header = True,
-                ),
-                # ft.IconButton(icon=ft.icons.CLOSE,on_click=self.handle_delete)
-            ]
+        # Create a new task with a delete button
+        new_task = ft.ListTile(
+            title=ft.Text(f"Task: {task_name}"),  # Use the task_name for the title
+            subtitle=ft.Text("Click the delete button to remove this task"),
+            trailing=ft.IconButton(
+                ft.icons.DELETE,
+                on_click=lambda e: self.handle_delete(e, task_list, v),
+                data=len(task_list.controls),  # Reference the task's position
+            ),
+            bgcolor=ft.colors.BLUE_400,
         )
 
-       
-        view=ft.Container(ft.ResponsiveRow([ft.Column(
-            width=800,
-            controls=[
-                ft.Row(
-                    controls=[
-                        new_task,
-                        ft.FloatingActionButton(icon=ft.icons.ADD, on_click=lambda e: (new_add_task(e,tasks_view,new_task.value,view,panel),view.update())),
-                        email_button,
-                    ],
-                ),
-                tasks_view,
-            ],
-        )     ])  ) 
+        # Append the new task to the task_list's controls
+        task_list.controls.append(new_task)
 
+        # Clear the input field after adding the task
+        task_input.value = ""
+        task_input.focus()
+
+        # Update the view to reflect changes
+        v.update()
+
+    def handle_delete(self, e: ft.ControlEvent, task_list, view):
+        # Remove the task at the specified index
+        task_index = e.control.data  # This references the index of the task
+        if 0 <= task_index < len(task_list.controls):
+            task_list.controls.pop(task_index)  # Remove the task from the list
+
+        # Refresh task indices after deletion
+        for idx, task in enumerate(task_list.controls):
+            # Update the delete button's data attribute with the new index
+            task.trailing = ft.IconButton(
+                ft.icons.DELETE,
+                on_click=lambda e, idx=idx: self.handle_delete(e, task_list, view),
+                data=idx  # Update the delete button index
+            )
+
+        view.update()
+
+    def generate_relay_tab(self, index):
+        close_button = ft.IconButton(
+            icon=ft.icons.CLOSE,
+            on_click=lambda e: (self.close_tab(e, tab), self.count_of_other_tabs == 0),
+            focus_color="RED_100", highlight_color="RED",
+            selected_icon_color="RED", scale=0.5, hover_color="RED"
+        )
+        email_button = ft.IconButton(icon=ft.icons.EMAIL, tooltip="Send")
+        tab_icon = ft.Icon(ft.icons.ABC)
+        name_tab_field = ft.Text(value="Incident Journal")
+        
+        # Task list to hold multiple ListTile tasks
+        task_list = ft.Column([])  # This will store all tasks (ListTiles)
+
+        # Task input field for adding new tasks
+        new_task_input = ft.TextField(
+            hint_text="INCIDENT NUMBER",
+            on_submit=lambda e: (self.add_task(e, view, task_list, new_task_input), view.update()),  # Add task on submit
+            expand=True,
+        )
+
+        # Task view container with scroll enabled
+        tasks_view = ft.Container(
+            content=ft.Column([task_list], scroll="AUTO", auto_scroll=True, expand=True),
+            height=self.page.height, expand=True
+        )
+
+        # Define the main view with task input and task list
+        view = ft.Container(
+            ft.ResponsiveRow([
+                ft.Column(
+                    width=800,
+                    controls=[
+                        ft.Row(
+                            controls=[
+                                new_task_input,
+                                ft.FloatingActionButton(
+                                    icon=ft.icons.ADD,
+                                    on_click=lambda e: (self.add_task(e, view, task_list, new_task_input), view.update())
+                                ),
+                                email_button,
+                            ],
+                        ),
+                        tasks_view  # The scrollable task view
+                    ],
+                )
+            ]),
+            height=self.page.height,
+            expand=True
+        )
+
+        # Create the tab with the view content
         tab = ft.Tab(
-            tab_content=ft.Row([tab_icon,name_tab_field,close_button]),
-            content=ft.Container(ft.Column([ft.Column([view])],
-            auto_scroll=True,scroll="AUTO",expand=True))
-        )        
-        view.horizontal_alignment = ft.CrossAxisAlignment.CENTER
+            tab_content=ft.Row([tab_icon, name_tab_field, close_button]),
+            content=ft.Container(
+                ft.Column([view], auto_scroll=True, scroll="AUTO", expand=True)
+            )
+        )
 
         return tab
+
+
+
 
     def add_config_tab(self, e):
         tc = self.tabs_control
