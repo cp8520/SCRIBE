@@ -319,7 +319,7 @@ class ScribeTabs(Observer):
                 ft.Column(
                     width=self.page.width,
                     controls=[
-                        ft.Row(
+                        ft.ResponsiveRow(
                             
                             controls=[
                                 new_task_input,
