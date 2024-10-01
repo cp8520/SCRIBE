@@ -267,32 +267,26 @@ class ScribeTabs(Observer):
                 on_click=lambda e: self.handle_delete(e, task_list, v),
                 data=len(task_list.controls),  # Reference the task's position
             ),
-            bgcolor=ft.colors.BLUE_400,
-        )
+            bgcolor=ft.colors.BLUE_400,content_padding=20,is_three_line=True,dense=True,toggle_inputs=False        )
 
-        # Append the new task to the task_list's controls
         task_list.controls.append(new_task)
-
-        # Clear the input field after adding the task
+        task_list.height = self.page.height/2
         task_input.value = ""
         task_input.focus()
 
-        # Update the view to reflect changes
         v.update()
 
     def handle_delete(self, e: ft.ControlEvent, task_list, view):
-        # Remove the task at the specified index
-        task_index = e.control.data  # This references the index of the task
+        task_index = e.control.data  
         if 0 <= task_index < len(task_list.controls):
-            task_list.controls.pop(task_index)  # Remove the task from the list
+            task_list.controls.pop(task_index)  
 
-        # Refresh task indices after deletion
         for idx, task in enumerate(task_list.controls):
-            # Update the delete button's data attribute with the new index
+
             task.trailing = ft.IconButton(
                 ft.icons.DELETE,
                 on_click=lambda e, idx=idx: self.handle_delete(e, task_list, view),
-                data=idx  # Update the delete button index
+                data=idx  
             )
 
         view.update()
@@ -308,29 +302,25 @@ class ScribeTabs(Observer):
         tab_icon = ft.Icon(ft.icons.ABC)
         name_tab_field = ft.Text(value="Incident Journal")
         
-        # Task list to hold multiple ListTile tasks
-        task_list = ft.Column([])  # This will store all tasks (ListTiles)
+        task_list = ft.Column([],expand=True,scroll="AUTO")
 
-        # Task input field for adding new tasks
         new_task_input = ft.TextField(
-            hint_text="INCIDENT NUMBER",
-            on_submit=lambda e: (self.add_task(e, view, task_list, new_task_input), view.update()),  # Add task on submit
+            hint_text="Journal entry",
+            on_submit=lambda e: (self.add_task(e, view, task_list, new_task_input), view.update()),
             expand=True,
         )
-
-        # Task view container with scroll enabled
         tasks_view = ft.Container(
-            content=ft.Column([task_list], scroll="AUTO", auto_scroll=True, expand=True),
-            height=self.page.height, expand=True
-        )
+            ft.Container(ft.ResponsiveRow([task_list]),
+            height=self.page.height, expand_loose=True,margin=20),margin=20)
+        
 
-        # Define the main view with task input and task list
         view = ft.Container(
-            ft.ResponsiveRow([
+            ft.Column([
                 ft.Column(
-                    width=800,
+                    width=self.page.width,
                     controls=[
                         ft.Row(
+                            
                             controls=[
                                 new_task_input,
                                 ft.FloatingActionButton(
@@ -340,11 +330,11 @@ class ScribeTabs(Observer):
                                 email_button,
                             ],
                         ),
-                        tasks_view  # The scrollable task view
+                        tasks_view
                     ],
                 )
             ]),
-            height=self.page.height,
+            padding=20,height=self.page.height,
             expand=True
         )
 
@@ -756,7 +746,7 @@ def main(page: ft.Page):
         leading_width=40,
         title=ft.WindowDragArea(
             ft.Container(
-                ft.Text("Knight Scribe"),
+                ft.Text("Knight"),
                 padding=20,scale=1.5
                 )),title_text_style=ft.TextStyle(italic=True),
         center_title=True,
