@@ -239,7 +239,7 @@ class ScribeTabs(Observer):
         dummy_field = ft.TextField()        
         if self.count_of_other_tabs <= 0 and len(tc.tabs) < 50:
             try:
-                self.count_of_other_tabs+=1
+                self.count_of_other_tabs += 1
                 new_index_position = len(self.tabs_list)
                 t = self.generate_relay_tab(new_index_position)
                 tc.tabs.append(t)
@@ -259,37 +259,37 @@ class ScribeTabs(Observer):
             return  # Don't add empty tasks
 
         # Create a new task with a delete button
-        new_task = ft.ListTile(
-            title=ft.Text(f"Task: {task_name}"),  # Use the task_name for the title
-            subtitle=ft.Text("Click the delete button to remove this task"),
-            trailing=ft.IconButton(
+        new_task = ft.ExpansionPanel(
+            header=ft.Text(f"Task: {task_name}"),  # Use the task_name for the title
+            content=ft.IconButton(
                 ft.icons.DELETE,
                 on_click=lambda e: self.handle_delete(e, task_list, v),
-                data=len(task_list.controls),  # Reference the task's position
+                data=len(task_list.controls),  # Index for the task
             ),
-            bgcolor=ft.colors.BLUE_400,content_padding=20,is_three_line=True,dense=True,toggle_inputs=False        )
+            bgcolor=ft.colors.BLUE_400
+        )
 
         task_list.controls.append(new_task)
-        task_list.height = self.page.height/2
         task_input.value = ""
         task_input.focus()
 
         v.update()
 
     def handle_delete(self, e: ft.ControlEvent, task_list, view):
-        task_index = e.control.data  
+        task_index = e.control.data  # Get the task index from the button's data attribute
         if 0 <= task_index < len(task_list.controls):
-            task_list.controls.pop(task_index)  
+            task_list.controls.pop(task_index)  # Remove the task from the list
 
+        # Re-assign the delete button's data attribute for all remaining tasks
         for idx, task in enumerate(task_list.controls):
-
-            task.trailing = ft.IconButton(
+            task.content = ft.IconButton(
                 ft.icons.DELETE,
                 on_click=lambda e, idx=idx: self.handle_delete(e, task_list, view),
-                data=idx  
+                data=idx  # Update the data attribute with the new index
             )
 
-        view.update()
+        view.update()  # Refresh the view to reflect the changes
+
 
     def generate_relay_tab(self, index):
         close_button = ft.IconButton(
@@ -298,43 +298,43 @@ class ScribeTabs(Observer):
             focus_color="RED_100", highlight_color="RED",
             selected_icon_color="RED", scale=0.5, hover_color="RED"
         )
-        email_button = ft.IconButton(icon=ft.icons.EMAIL, tooltip="Send")
-        tab_icon = ft.Icon(ft.icons.ABC)
-        name_tab_field = ft.Text(value="Incident Journal")
+        email_button = ft.IconButton(icon=ft.icons.SEND_AND_ARCHIVE, tooltip="Send")
+        tab_icon = ft.Icon(ft.icons.LIST)
+        name_tab_field = ft.Text(value="Task Journal")
         
-        task_list = ft.Column([],expand=True,scroll="AUTO")
+        task_list = ft.ExpansionPanelList([])
 
         new_task_input = ft.TextField(
             hint_text="Journal entry",
             on_submit=lambda e: (self.add_task(e, view, task_list, new_task_input), view.update()),
             expand=True,
         )
-        tasks_view = ft.Container(
-            ft.Container(ft.ResponsiveRow([task_list]),
-            height=self.page.height, expand_loose=True,margin=20),margin=20)
         
+        # Ensure task list view is scrollable
+        tasks_view = ft.Container(
+            content=ft.ListView(  # Using ListView for proper scroll handling
+                controls=[task_list],
+                expand=True,  # Let ListView grow within the container
+            ),
+            height=self.page.height-300,padding=20,  # Adjust the height of the container to control the visible area
+        )
 
         view = ft.Container(
             ft.Column([
-                ft.Column(
-                    width=self.page.width,
+                ft.Row(
                     controls=[
-                        ft.ResponsiveRow(
-                            
-                            controls=[
-                                new_task_input,
-                                ft.FloatingActionButton(
-                                    icon=ft.icons.ADD,
-                                    on_click=lambda e: (self.add_task(e, view, task_list, new_task_input), view.update())
-                                ),
-                                email_button,
-                            ],
+                        new_task_input,
+                        ft.FloatingActionButton(
+                            icon=ft.icons.ADD,
+                            on_click=lambda e: (self.add_task(e, view, task_list, new_task_input), view.update())
                         ),
-                        tasks_view
+                        email_button,
                     ],
-                )
+                ),
+                tasks_view  # Add the scrollable task view here
             ]),
-            padding=20,height=self.page.height,
+            padding=20,
+            height=self.page.height,
             expand=True
         )
 
@@ -342,11 +342,12 @@ class ScribeTabs(Observer):
         tab = ft.Tab(
             tab_content=ft.Row([tab_icon, name_tab_field, close_button]),
             content=ft.Container(
-                ft.Column([view], auto_scroll=True, scroll="AUTO", expand=True)
+                ft.Column([view], auto_scroll=True, scroll="auto", expand=True)  # Enable scrolling in the tab container
             )
         )
 
         return tab
+
 
 
 
@@ -757,7 +758,7 @@ def main(page: ft.Page):
                     ft.PopupMenuItem(text="Account",icon=ft.icons.PERSON,padding=20,
                         on_click=on_add_profile_button_click),
                     ft.PopupMenuItem(),  # divider
-                    ft.PopupMenuItem(text="Incident Management Journal",icon=ft.icons.LIST,padding=20,
+                    ft.PopupMenuItem(text="Journal",icon=ft.icons.LIST,padding=20,
                         on_click=on_add_relay_tool_button_click),
                     ft.PopupMenuItem(),  # divider
                     ft.PopupMenuItem(text="Preferences",icon=ft.icons.EDIT,padding=20,
