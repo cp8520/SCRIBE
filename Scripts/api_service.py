@@ -17,13 +17,12 @@ class ApiService:
     def get_token(self):
         t = self.token
         return t
-            
 
     def update_endpoint(api_service, new_endpoint):
         api_service.authsvcendpoint = new_endpoint
         print(f"Endpoint updated to: {api_service.authsvcendpoint}")
 
-    def signed_in_check(self, e, username=None, password=None):
+    def signed_in(self, e, username=None, password=None):
         u = username if username else "NA"
         p = "not blank" if password else "NA"
 

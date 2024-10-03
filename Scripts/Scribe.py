@@ -7,7 +7,7 @@ from subject import Subject
 import pickle
 import time
 import flet as ft
-
+import json
 class PageObserver(Observer):
     def __init__(self, page: ft.Page):
         self.page = page
@@ -49,7 +49,10 @@ class ScribeTabs(Observer):
         )
         self.color_list = ["BLACK","RED","YELLOW","GREEN","BLUE","INDIGO","PURPLE","WHITE","BLACK100"]
         self.current_color_index = 0
-        self.count_of_other_tabs = 0
+        self.count_of_journal_tabs = 0
+        self.count_of_prefs_tabs = 0
+        self.count_of_profile_tabs = 0
+        self.count_of_config_tabs = 0
 
 
     def update(self):
@@ -173,9 +176,9 @@ class ScribeTabs(Observer):
     def add_prefs_tab(self, e):
         tc = self.tabs_control
         dummy_field = ft.TextField()
-        if self.count_of_other_tabs <= 0 and len(tc.tabs) < 50:
+        if self.count_of_prefs_tabs <= 0 and len(tc.tabs) < 50:
             try:
-                self.count_of_other_tabs+=1
+                self.count_of_prefs_tabs+=1
                 new_index_position = len(self.tabs_list)
                 t = self.generate_prefs_tab(new_index_position)
                 tc.tabs.append(t)
@@ -201,7 +204,7 @@ class ScribeTabs(Observer):
         slider_icon = ft.Icon(ft.icons.OPACITY)       
         slider_row = ft.Container(ft.Row(controls=[slider_icon,value_slider_text,value_slider]))
         close_button = ft.IconButton(
-            icon=ft.icons.CLOSE,on_click=lambda e: (self.close_tab(e, tab),self.count_of_other_tabs==0),
+            icon=ft.icons.CLOSE,on_click=lambda e: (self.close_prefs_tab(e, tab),self.count_of_prefs_tabs==0),
             focus_color="RED_100",highlight_color="RED",
             selected_icon_color="RED",scale=.5,hover_color="RED"
         )
@@ -237,9 +240,9 @@ class ScribeTabs(Observer):
     def add_relay_tab(self, e):
         tc = self.tabs_control
         dummy_field = ft.TextField()        
-        if self.count_of_other_tabs <= 0 and len(tc.tabs) < 50:
+        if self.count_of_journal_tabs <= 0 and len(tc.tabs) < 50:
             try:
-                self.count_of_other_tabs += 1
+                self.count_of_journal_tabs += 1
                 new_index_position = len(self.tabs_list)
                 t = self.generate_relay_tab(new_index_position)
                 tc.tabs.append(t)
@@ -294,7 +297,7 @@ class ScribeTabs(Observer):
     def generate_relay_tab(self, index):
         close_button = ft.IconButton(
             icon=ft.icons.CLOSE,
-            on_click=lambda e: (self.close_tab(e, tab), self.count_of_other_tabs == 0),
+            on_click=lambda e: (self.close_journal_tab(e, tab), self.count_of_journal_tabs == 0),
             focus_color="RED_100", highlight_color="RED",
             selected_icon_color="RED", scale=0.5, hover_color="RED"
         )
@@ -349,14 +352,12 @@ class ScribeTabs(Observer):
         return tab
 
 
-
-
-
     def add_config_tab(self, e):
         tc = self.tabs_control
         dummy_field = ft.TextField()
-        if self.count_of_other_tabs <= 0 and len(tc.tabs) < 50:
+        if self.count_of_config_tabs <= 0 and len(tc.tabs) < 50:
             try:
+                self.count_of_config_tabs += 1
                 new_index_position = len(self.tabs_list)
                 t = self.generate_config_tab(new_index_position)
                 tc.tabs.append(t)
@@ -372,7 +373,7 @@ class ScribeTabs(Observer):
 
     def generate_config_tab(self, index):
         close_button = ft.IconButton(
-            icon=ft.icons.CLOSE,on_click=lambda e: (self.close_tab(e, tab),self.count_of_other_tabs==0),
+            icon=ft.icons.CLOSE,on_click=lambda e: (self.close_config_tab(e, tab),self.count_of_config_tabs==0),
             focus_color="RED_100",highlight_color="RED",
             selected_icon_color="RED",scale=.5,hover_color="RED"
         )
@@ -400,31 +401,30 @@ class ScribeTabs(Observer):
     def add_profile_tab(self, e):
         tc = self.tabs_control
         dummy_field = ft.TextField()
-        if self.count_of_other_tabs <= 0 and len(tc.tabs) < 50:
+        if self.count_of_profile_tabs <= 0 and len(tc.tabs) < 50:
             try:
-                self.count_of_other_tabs+=1
+                self.count_of_profile_tabs += 1
                 new_index_position = len(self.tabs_list)
-                t = self.generate_profile_tab(new_index_position)
+                t = self.generate_profile_tab(new_index_position)  # Generate the profile tab
                 tc.tabs.append(t)
                 self.input_fields.append(dummy_field)
                 self.tabs_list = tc.tabs
                 self.page.update()
             except Exception as ex:
-                # self.page.open(self.err(f"EXCEPTION: {ex}"))
                 pass
         else:
-            # self.page.open(self.err("Max amount of tabs reached!"))
             pass
 
+
     def generate_profile_tab(self, index):
+        name_tab_field = ft.Text(value="Account")
         username = ft.TextField(hint_text="Username", expand=False)
         password = ft.TextField(
             hint_text="Password",
             password=True,
             can_reveal_password=True,
-            on_submit=lambda e: self.authenticate_and_update(e, username.value, password.value)  # Call the new method here
+            on_submit=lambda e: self.authenticate_and_update(e, username.value, password.value, index,name_tab_field)  # Pass tab index here
         )
-        token = self.api.get_token
         logout_button = ft.IconButton(
             icon=ft.icons.LOGOUT,
             focus_color="RED_100",
@@ -435,20 +435,18 @@ class ScribeTabs(Observer):
         )
         close_button = ft.IconButton(
             icon=ft.icons.CLOSE,
-            on_click=lambda e: (self.close_tab(e, tab),self.count_of_other_tabs==0),
+            on_click=lambda e: (self.close_profile_tab(e, tab), self.count_of_profile_tabs == 0),
             focus_color="RED_100",
             highlight_color="RED",
-            selected_icon_color="RED",
+            selected_icon_color="RED_100",
             scale=.5,
             hover_color="RED"
         )
+
         
-        name_tab_field = ft.Text(value="Account")
+        
         tab_icon = ft.Icon(ft.icons.PERSON, scale=.75)
 
-        # if token != None:
-        #     tab_content = ft.Container(content=ft.Container(content=ft.Column([logout_button])))
-        # else: 
         tab_content = ft.Container(content=ft.Container(content=ft.Column([username, password])))
 
         tab = ft.Tab(
@@ -457,31 +455,57 @@ class ScribeTabs(Observer):
         )
         return tab
 
-    def authenticate_and_update(self, e, username, password):
+    def authenticate_and_update(self, e, username, password, tab_index,tab_name):
         if username and password:
             try:
-                self.api.signed_in_check(e, username, password)  # Check the sign-in
-                user_details = self.api.make_authorized_request(username)  # Fetch user details
-                self.page.update()
+                self.api.signed_in(e, username, password) # sign-in and get token, if there isn't already one.
+                user_details = self.api.make_authorized_request(username)  # Fetch user details using the token.
+                # Call to update UI with the retrieved profile details
+                self.update_ui_with_profile_details(user_details, tab_index,tab_name)
             except Exception as ex:
                 self.page.open(self.err("Authentication failed. Please check your credentials."))
                 self.page.open(self.err(f"An error occurred: {ex}"))
 
-    def update_ui_with_profile_details(self, user_details, tab):
-        # Assuming user_details is a dictionary with relevant profile information
-        profile_info = f"Username: {user_details.get('username')}\n" \
-                    f"Email: {user_details.get('email')}\n" \
-                    f"Other Info: {user_details.get('other_info')}"  # Customize as needed
+    def update_ui_with_profile_details(self, user_details, tab_index,tab_name):
+        # Check if user_details is an empty string or None
+        if not user_details:
+            print("Error: user_details is empty or None.")
+            return
 
-        # Create a Text widget to display the profile info
-        profile_display = ft.Text(value=profile_info)
+        # If user_details is a string like 'ID: 1, Email: george.bluth@reqres.in, ...', parse it manually
+        if isinstance(user_details, str):
+            try:
+                # Manually convert the string into a dictionary
+                user_details = dict(item.split(": ") for item in user_details.split(", "))
+            except Exception as e:
+                print(f"Error parsing user details string: {e}")
+                return
 
-        # Update the content of the passed tab
-        tab.content = ft.Container(
-            ft.Column([profile_display], auto_scroll=True, scroll=True, expand=True)
+        # Ensure tab_index is within range
+        if tab_index < 0 or tab_index >= len(self.tabs_list):
+            print(f"Error: tab_index {tab_index} is out of range.")
+            return
+
+        # Generate profile information from user_details
+        profile_info = [
+            ft.Text(f"Username: {user_details.get('First Name', 'N/A')} {user_details.get('Last Name', 'N/A')}"),
+            ft.Text(f"Email: {user_details.get('Email', 'N/A')}"),
+            ft.Image(src=user_details.get('Avatar', ''), width=80, height=80),  # Display Avatar image
+        ]
+        tab_name = ft.Text(f"{user_details.get('First Name', 'N/A')}{user_details.get('Last Name', 'N/A')}")
+        # Create a View to display profile information
+        profile_view = ft.Column(
+            controls=profile_info,spacing=ft.MainAxisAlignment.CENTER
         )
 
-        self.page.update(tab)  # Update the page to reflect changes
+        # Update the content of the tab at the given index
+        self.tabs_list[tab_index].content = profile_view
+        self.tabs_list[tab_index].tab_content.name = tab_name
+        # Refresh the page to reflect changes
+        self.page.update()
+
+
+
 
     def save_tab_content_on_blur(self,e,tab,tabName):
         tab_index = self.tabs_list.index(tab)
@@ -550,15 +574,41 @@ class ScribeTabs(Observer):
                 # self.page.open(self.err(f"EXCEPTION @ remove saved tab: {ex}"))
                 pass
 
-    def close_tab(self,e,tab):
+    def close_journal_tab(self,e,tab):
         dummy_field = ft.TextField()
-        self.count_of_other_tabs-=1
+        self.count_of_journal_tabs-=1
         self.save_prefs(self,self.tabs_control.indicator_color)
         self.tabs_list.remove(tab)
         self.input_fields.pop()
         self.tabs_control.tabs = self.tabs_list
         self.page.update()
-
+    def close_profile_tab(self,e,tab):
+        dummy_field = ft.TextField()
+        self.count_of_profile_tabs-=1
+        self.save_prefs(self,self.tabs_control.indicator_color)
+        if tab in self.tabs_list:
+                self.tabs_list.remove(tab)
+        else:
+            print("Tab not found in list")
+        self.input_fields.pop()
+        self.tabs_control.tabs = self.tabs_list
+        self.page.update()
+    def close_config_tab(self,e,tab):
+        dummy_field = ft.TextField()
+        self.count_of_config_tabs-=1
+        self.save_prefs(self,self.tabs_control.indicator_color)
+        self.tabs_list.remove(tab)
+        self.input_fields.pop()
+        self.tabs_control.tabs = self.tabs_list
+        self.page.update()
+    def close_prefs_tab(self,e,tab):
+        dummy_field = ft.TextField()
+        self.count_of_prefs_tabs-=1
+        self.save_prefs(self,self.tabs_control.indicator_color)
+        self.tabs_list.remove(tab)
+        self.input_fields.pop()
+        self.tabs_control.tabs = self.tabs_list
+        self.page.update()
 class TimestampGenerator(Observer):
     def __init__(self, page: ft.Page):
         self.page = page
