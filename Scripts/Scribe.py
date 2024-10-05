@@ -405,18 +405,21 @@ class ScribeTabs(Observer):
             try:
                 self.count_of_profile_tabs += 1
                 new_index_position = len(self.tabs_list)
-                t = self.generate_profile_tab(new_index_position)  # Generate the profile tab
+                t = self.generate_profile_tab(new_index_position) 
+                print(f"New Index Position:{new_index_position}") # Generate the profile tab
                 tc.tabs.append(t)
                 self.input_fields.append(dummy_field)
                 self.tabs_list = tc.tabs
                 self.page.update()
             except Exception as ex:
-                pass
+                print(f"EXCEPTION:{ex}")
         else:
             pass
 
 
     def generate_profile_tab(self, index):
+        api_token = self.api.token
+        email = self.api.username
         name_tab_field = ft.Text(value="Account")
         username = ft.TextField(hint_text="Username", expand=False)
         password = ft.TextField(
@@ -443,11 +446,17 @@ class ScribeTabs(Observer):
             hover_color="RED"
         )
 
-        
-        
         tab_icon = ft.Icon(ft.icons.PERSON, scale=.75)
 
-        tab_content = ft.Container(content=ft.Container(content=ft.Column([username, password])))
+        if api_token == None:
+            tab_content = ft.Container(content=ft.Container(content=ft.Column([username, password])))
+        else:
+            sign_out_button = ft.IconButton(icon=ft.icons.LOGOUT)
+            account_view = ft.View(controls=[sign_out_button])
+            user_details = self.api.make_authorized_request(email)
+            tab_content = ft.Container(content=account_view)
+            self.update_ui_with_profile_details(user_details,index,email)        
+        
 
         tab = ft.Tab(
             tab_content=ft.Row([tab_icon, name_tab_field, close_button]),
@@ -483,16 +492,20 @@ class ScribeTabs(Observer):
 
         # Ensure tab_index is within range
         if tab_index < 0 or tab_index >= len(self.tabs_list):
-            print(f"Error: tab_index {tab_index} is out of range.")
-            return
+            try:
+                print(f"Error: tab_index {tab_index} is out of range.")         
+
+            except Exception as ex:
+                print(f"EXCEPTION:{ex}")
+
 
         # Generate profile information from user_details
         profile_info = [
             ft.Text(f"Username: {user_details.get('First Name', 'N/A')} {user_details.get('Last Name', 'N/A')}"),
             ft.Text(f"Email: {user_details.get('Email', 'N/A')}"),
-            ft.Image(src=user_details.get('Avatar', ''), width=80, height=80),  # Display Avatar image
+            ft.Image(src=user_details.get('Avatar', ''), width=200, height=200,),  # Display Avatar image
         ]
-        tab_name = ft.Text(f"{user_details.get('First Name', 'N/A')}{user_details.get('Last Name', 'N/A')}")
+        # tab_name = ft.Text(f"{user_details.get('First Name', 'N/A')}{user_details.get('Last Name', 'N/A')}")
         # Create a View to display profile information
         profile_view = ft.Column(
             controls=profile_info,spacing=ft.MainAxisAlignment.CENTER
